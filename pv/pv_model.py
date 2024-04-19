@@ -26,23 +26,41 @@
 #
 # Input/Output Parameters
 # Inputs: irradiance, temperature, pv module characteristics
-# Output: pv module power output for 30 years
+# Output: pv module power
 #
-# Utilization: from the csv data we generate predictions of the irradiance behaviour for the next 30 years
+# Code explanation: from the csv data, we generate predictions of the irradiance behaviour for the next 30 years with 1 minute interval
 #
 ###
 
-# Libraries
+# A PV module class is created to define objects with the characteristics needed for the power calculation
+class PV_Module:
+    def __init__(self, model, nom_power, temp_coeff, year_deg):
+        self.model = model
+        self.nom_power = nom_power
+        self.temp_coeff = temp_coeff
+        self.year_deg = year_deg
+
+    def __str__(self):
+        return f"PV Module {self.model} with {self.nom_power} [W] nominal power, {self.temp_coeff} [%] temperature coefficient and {self.year_deg} [%] yearly degradation."
+
+    def pv_power_calculation(self, irr, temp, init_timestamp, curr_timestamp):
+        stc_temp = 25
+        stc_irr = 1000
+
+        days = (curr_timestamp - init_timestamp) / 86400000
+
+        pv_power = (irr / stc_irr) * (1 + (days * 0.01 * self.year_deg) / 365.25) * self.nom_power * (1 + 0.01 * self.temp_coeff * (temp - stc_temp)) 
+
+        return pv_power
+
+# RestarSolar RT8I -- Power = 560 [W] -- Temperature coefficient = -0.39 [%] -- Yearly degradation = -0.5 [%]
+restarsolar_rt8i = PV_Module("RestarSolar RT8I", 560, -0.39, -0.5)
+
+# Import pandas
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
 
-# PV module characteristics
-days = 0
-I_s = 1000
-C_r = 560
-alpha = -0.0039  # conversion used to insert directly into formula -0.39 [%/°C]
-T_s = 25
-D_pv = (1 - 0.00001369863 * days) # degradation considered to be 0.001369863 [%/day] or 15 [%] for 30 [years] 
+# The data for the irradiation and temperature is imported from the csv and the columns that will not be used are dropped
+irradiance_readings = pd.read_csv("pv\solar_irradiance.csv")
+irradiance_readings.drop(columns = ['dir', 'dif', 'sct', 'ghi', 'dirh', 'difh', 'dni', 'vel', 'shadow', 'cloud'], inplace = True)
 
-print(D_pv)
+print(type(irradiance_readings['temp'][0]))
