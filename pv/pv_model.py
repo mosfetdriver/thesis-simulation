@@ -12,7 +12,7 @@
 # T: operating temperature [°C]
 # T_s: STC temperature [°C]
 # 
-# Irradiance downloaded from: https://solar.minenergia.cl/exploracion
+# Irradiance downloaded from tmy (typical meteorological year) data located in: https://solar.minenergia.cl/exploracion
 # Location:
 # (Lat, Long) = (-39.8332, -73.2452)
 # Method: average hourly for a 10 min sample 
@@ -28,7 +28,7 @@
 # Inputs: irradiance, temperature, pv module characteristics
 # Output: pv module power
 #
-# Code explanation: from the csv data, we generate predictions of the irradiance behaviour for the next 30 years with 1 minute interval
+# Code explanation: the data from the csv is interpolated to generate data with a 1 min interval
 #
 ###
 
@@ -49,7 +49,7 @@ class PV_Module:
 
         days = (curr_timestamp - init_timestamp) / 86400000
 
-        pv_power = (irr / stc_irr) * (1 + (days * 0.01 * self.year_deg) / 365.25) * self.nom_power * (1 + 0.01 * self.temp_coeff * (temp - stc_temp)) 
+        pv_power = (irr / stc_irr) * (1 + (days * 0.01 * self.year_deg) / 365) * self.nom_power * (1 + 0.01 * self.temp_coeff * (temp - stc_temp)) 
 
         return pv_power
 
@@ -63,4 +63,7 @@ import pandas as pd
 irradiance_readings = pd.read_csv("pv\solar_irradiance.csv")
 irradiance_readings.drop(columns = ['dir', 'dif', 'sct', 'ghi', 'dirh', 'difh', 'dni', 'vel', 'shadow', 'cloud'], inplace = True)
 
-print(type(irradiance_readings['temp'][0]))
+for i in range(len(irradiance_readings['Fecha/Hora'])):
+    irradiance_readings.loc[i, "Fecha/Hora"] = irradiance_readings.loc[i, "Fecha/Hora"][5:]
+
+print(irradiance_readings)
