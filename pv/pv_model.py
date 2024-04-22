@@ -28,8 +28,6 @@
 # Inputs: irradiance, temperature, pv module characteristics
 # Output: pv module power
 #
-# Code explanation: the data from the csv is interpolated to generate data with a 1 min interval
-#
 ###
 
 # Libraries
@@ -90,9 +88,9 @@ pv_results['temp'] = temp_interp
 pv_power_list = []
 
 for i in range(len(datetime_list)):
-    pv_power = restarsolar_rt8i.pv_power_calculation(pv_results.loc[i, 'glb'], 
-                                                     pv_results.loc[i, 'temp'], 
-                                                     0, 
+    pv_power = restarsolar_rt8i.pv_power_calculation(pv_results.loc[i, 'glb'],
+                                                     pv_results.loc[i, 'temp'],
+                                                     0,
                                                      datetime.strptime(pv_results.loc[i, 'datetime'], '%Y-%m-%d %H:%M').timestamp())
     pv_power_list.append(pv_power)
 
