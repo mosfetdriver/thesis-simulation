@@ -43,13 +43,11 @@ class PV_Module:
     def __str__(self):
         return f"PV Module {self.model} with {self.nom_power} [W] nominal power, {self.temp_coeff} [%] temperature coefficient and {self.year_deg} [%] yearly degradation."
 
-    def pv_power_calculation(self, irr, temp, init_timestamp, curr_timestamp):
+    def pv_power_calculation(self, irr, temp, year, day):
         stc_temp = 25
         stc_irr = 1000
 
-        days = (curr_timestamp - init_timestamp) / 86400000
-
-        pv_power = (irr / stc_irr) * (1 + (days * 0.01 * self.year_deg) / 365) * self.nom_power * (1 + 0.01 * self.temp_coeff * (temp - stc_temp)) 
+        pv_power = (irr / stc_irr) * (1 + (day * 0.01 * self.year_deg) / 365) * self.nom_power * (1 + 0.01 * self.temp_coeff * (temp - stc_temp)) 
 
         return pv_power
 
@@ -60,10 +58,27 @@ restarsolar_rt8i = PV_Module("RestarSolar RT8I", 560, -0.39, -0.5)
 import pandas as pd
 
 # The data for the irradiation and temperature is imported from the csv and the columns that will not be used are dropped
-irradiance_readings = pd.read_csv("pv\solar_irradiance.csv")
-irradiance_readings.drop(columns = ['dir', 'dif', 'sct', 'ghi', 'dirh', 'difh', 'dni', 'vel', 'shadow', 'cloud'], inplace = True)
+irr_readings = pd.read_csv("pv\solar_irradiance.csv")
+irr_readings.drop(columns = ['dir', 'dif', 'sct', 'ghi', 'dirh', 'difh', 'dni', 'vel', 'shadow', 'cloud'], inplace = True)
 
-for i in range(len(irradiance_readings['Fecha/Hora'])):
-    irradiance_readings.loc[i, "Fecha/Hora"] = irradiance_readings.loc[i, "Fecha/Hora"][5:]
+# To store the interpolated data (1 reading per minute instead of 1 reading per hour), a new empty dataframe is created
+irr_readings_interp = pd.DataFrame(columns = ['datetime', 'glb', 'temp'])
 
-print(irradiance_readings)
+# The year of the datetime data is deleted
+for i in range(len(irr_readings['Fecha/Hora'])):
+    irr_readings.loc[i, "Fecha/Hora"] = irr_readings.loc[i, "Fecha/Hora"][5:]
+
+# New interpolated data is created
+import numpy as np
+index = np.linspace(0, 8759, num = 8760)
+temp = irr_readings['temp'].tolist()
+irr = irr_readings['glb'].tolist()
+
+index_interp = np.linspace(0, 525599, num = 525600)
+temp_interp = np.interp(index_interp, index, temp)
+irr_interp = np.interp(index_interp, index, irr)
+
+irr_readings_interp['glb'] = irr_interp
+irr_readings_interp['temp'] = temp_interp
+
+print(irr_readings_interp)
