@@ -32,6 +32,12 @@
 #
 ###
 
+# Libraries
+import pandas as pd
+import numpy as np
+from datetime import datetime, timedelta
+import matplotlib.pyplot as plt
+
 # A PV module class is created to define objects with the characteristics needed for the power calculation
 class PV_Module:
     def __init__(self, model, nom_power, temp_coeff, year_deg):
@@ -54,9 +60,6 @@ class PV_Module:
 # RestarSolar RT8I -- Power = 560 [W] -- Temperature coefficient = -0.39 [%] -- Yearly degradation = -0.5 [%]
 restarsolar_rt8i = PV_Module("RestarSolar RT8I", 560, -0.39, -0.5)
 
-# Import pandas
-import pandas as pd
-
 # The data for the irradiation and temperature is imported from the csv and the columns that will not be used are dropped
 irr_readings = pd.read_csv("pv\solar_irradiance.csv")
 irr_readings.drop(columns = ['dir', 'dif', 'sct', 'ghi', 'dirh', 'difh', 'dni', 'vel', 'shadow', 'cloud'], inplace = True)
@@ -64,21 +67,25 @@ irr_readings.drop(columns = ['dir', 'dif', 'sct', 'ghi', 'dirh', 'difh', 'dni', 
 # To store the interpolated data (1 reading per minute instead of 1 reading per hour), a new empty dataframe is created
 irr_readings_interp = pd.DataFrame(columns = ['datetime', 'glb', 'temp'])
 
-# The year of the datetime data is deleted
-for i in range(len(irr_readings['Fecha/Hora'])):
-    irr_readings.loc[i, "Fecha/Hora"] = irr_readings.loc[i, "Fecha/Hora"][5:]
-
 # New interpolated data is created
-import numpy as np
-index = np.linspace(0, 8759, num = 8760)
+start_date = datetime(year = 2025, month = 1, day = 1, hour = 0, minute = 0)
+end_date = datetime(year = 2025, month = 12, day = 31, hour = 23, minute = 59)
+time_interval = timedelta(minutes = 1)
+datetime_list = []
+current_date = start_date
+
+index = np.linspace(start_date.timestamp(), end_date.timestamp(), num = 8760)
 temp = irr_readings['temp'].tolist()
 irr = irr_readings['glb'].tolist()
 
-index_interp = np.linspace(0, 525599, num = 525600)
+while (current_date <= end_date):
+    datetime_list.append(current_date.strftime('%Y-%m-%d %H:%M'))
+    current_date += time_interval
+
+index_interp = np.linspace(start_date.timestamp(), end_date.timestamp(), num = 525600)
 temp_interp = np.interp(index_interp, index, temp)
 irr_interp = np.interp(index_interp, index, irr)
 
+irr_readings_interp['datetime'] = datetime_list
 irr_readings_interp['glb'] = irr_interp
 irr_readings_interp['temp'] = temp_interp
-
-print(irr_readings_interp)
