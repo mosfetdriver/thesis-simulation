@@ -36,7 +36,6 @@
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
-import matplotlib.pyplot as plt
 
 # A PV module class is created to define objects with the characteristics needed for the power calculation
 class PV_Module:
@@ -49,23 +48,23 @@ class PV_Module:
     def __str__(self):
         return f"PV Module {self.model} with {self.nom_power} [W] nominal power, {self.temp_coeff} [%] temperature coefficient and {self.year_deg} [%] yearly degradation."
 
-    def pv_power_calculation(self, irr, temp, year, day):
+    def pv_power_calculation(self, irr, temp, year, current_timestamp):
         stc_temp = 25
         stc_irr = 1000
-
-        pv_power = (irr / stc_irr) * (1 + (day * 0.01 * self.year_deg) / 365) * self.nom_power * (1 + 0.01 * self.temp_coeff * (temp - stc_temp)) 
-
+        initial_datetime = datetime(year = 2025, month = 1, day = 1, hour = 0, minute = 0)
+        derating_factor = 1 + ((0.01 * self.year_deg * year) + (0.01 * self.year_deg * ((current_timestamp - initial_datetime.timestamp())/(365 * 24 * 60 * 60))))
+        pv_power = (irr / stc_irr) * derating_factor * self.nom_power * (1 + 0.01 * self.temp_coeff * (temp - stc_temp))
         return pv_power
 
 # RestarSolar RT8I -- Power = 560 [W] -- Temperature coefficient = -0.39 [%] -- Yearly degradation = -0.5 [%]
 restarsolar_rt8i = PV_Module("RestarSolar RT8I", 560, -0.39, -0.5)
 
 # The data for the irradiation and temperature is imported from the csv and the columns that will not be used are dropped
-irr_readings = pd.read_csv("pv\solar_irradiance.csv")
-irr_readings.drop(columns = ['dir', 'dif', 'sct', 'ghi', 'dirh', 'difh', 'dni', 'vel', 'shadow', 'cloud'], inplace = True)
+solar_readings = pd.read_csv("pv/solar_irradiance.csv")
+solar_readings.drop(columns = ['dir', 'dif', 'sct', 'ghi', 'dirh', 'difh', 'dni', 'vel', 'shadow', 'cloud'], inplace = True)
 
 # To store the interpolated data (1 reading per minute instead of 1 reading per hour), a new empty dataframe is created
-irr_readings_interp = pd.DataFrame(columns = ['datetime', 'glb', 'temp'])
+pv_results = pd.DataFrame(columns = ['datetime', 'glb', 'temp'])
 
 # New interpolated data is created
 start_date = datetime(year = 2025, month = 1, day = 1, hour = 0, minute = 0)
@@ -75,8 +74,8 @@ datetime_list = []
 current_date = start_date
 
 index = np.linspace(start_date.timestamp(), end_date.timestamp(), num = 8760)
-temp = irr_readings['temp'].tolist()
-irr = irr_readings['glb'].tolist()
+temp = solar_readings['temp'].tolist()
+irr = solar_readings['glb'].tolist()
 
 while (current_date <= end_date):
     datetime_list.append(current_date.strftime('%Y-%m-%d %H:%M'))
@@ -85,7 +84,17 @@ while (current_date <= end_date):
 index_interp = np.linspace(start_date.timestamp(), end_date.timestamp(), num = 525600)
 temp_interp = np.interp(index_interp, index, temp)
 irr_interp = np.interp(index_interp, index, irr)
+pv_results['datetime'] = datetime_list
+pv_results['glb'] = irr_interp
+pv_results['temp'] = temp_interp
+pv_power_list = []
 
-irr_readings_interp['datetime'] = datetime_list
-irr_readings_interp['glb'] = irr_interp
-irr_readings_interp['temp'] = temp_interp
+for i in range(len(datetime_list)):
+    pv_power = restarsolar_rt8i.pv_power_calculation(pv_results.loc[i, 'glb'], 
+                                                     pv_results.loc[i, 'temp'], 
+                                                     0, 
+                                                     datetime.strptime(pv_results.loc[i, 'datetime'], '%Y-%m-%d %H:%M').timestamp())
+    pv_power_list.append(pv_power)
+
+pv_results['pv_power'] = pv_power_list
+pv_results.to_csv("pv/pv_results.csv", index = False)
