@@ -95,4 +95,21 @@ for i in range(len(datetime_list)):
     pv_power_list.append(pv_power)
 
 pv_results['pv_power'] = pv_power_list
-pv_results.to_csv("pv/pv_results.csv", index = False)
+pv_results.to_csv("pv_system/pv_results.csv", index = False)
+
+# The calculation is made to 30 years
+pv_results_30y = pd.DataFrame(columns=['pv_power'])
+pv_power_30y = 0
+pv_power_30y_list = []
+
+for i in range(30):
+    print("Year: ", i)
+    for j in range(len(datetime_list)):
+        pv_power_30y = restarsolar_rt8i.pv_power_calculation(pv_results.loc[j, 'glb'],
+                                                        pv_results.loc[j, 'temp'],
+                                                        i,
+                                                        datetime.strptime(pv_results.loc[j, 'datetime'], '%Y-%m-%d %H:%M').timestamp())
+        pv_power_30y_list.append(pv_power_30y)
+
+pv_results_30y['pv_power'] = pv_power_30y_list
+pv_results_30y.to_csv("pv_system/pv_results_30y.csv", index = False)
