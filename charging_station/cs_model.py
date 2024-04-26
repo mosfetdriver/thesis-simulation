@@ -1,2 +1,0 @@
-## CS MODEL FOR SIMULATION ##
-
