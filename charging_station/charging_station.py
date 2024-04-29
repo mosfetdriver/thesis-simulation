@@ -6,32 +6,32 @@
 
 # A class is created to implement the charging station
 class ChargingStation:
-    def __init__(self, name, P_nom, n_cs, P_ch_max, P_ch_min, n_load, n_res):
-        self.name        = name           ## Charging station identifier
-        self.P_nom       = P_nom          ## Maximum power from electrical network
-        self.n_cs        = n_cs           ## Number of charging points
-        self.P_ch_max    = P_ch_max       ## Maximum charging power
-        self.P_ch_min    = P_ch_min       ## Minimum charging power
-        self.n_load      = n_load         ## Number of external loads
-        self.n_res       = n_res          ## Number of renewable energy sources
+    def __init__(self, name, p_nom, n_cs, max_chrg_pwr, min_chrg_pwr, n_load, n_res):
+        self.name           = name               # Charging station identifier
+        self.p_nom          = p_nom              # Maximum power from electrical network
+        self.n_cs           = n_cs               # Number of charging points
+        self.max_chrg_pwr   = max_chrg_pwr       # Maximum charging power
+        self.min_chrg_pwr   = min_chrg_pwr       # Minimum charging power
+        self.n_load         = n_load             # Number of external loads
+        self.n_res          = n_res              # Number of renewable energy sources
 
     def __str__(self):
-        return f"Charging station {self.name} with {self.n_cs} charging points with {self.P_ch_max} [kW] of maximum power."
+        return f"Charging station {self.name} with {self.n_cs} charging points with {self.max_chrg_pwr} [kW] of maximum power."
     
-    def water_filling_algorithm(self, E_dem, E_ch, t_in, t_out, P_load, P_res, actual_time):
-        P_ref         = [0, 0, 0, 0]                        # Potencia de referencia de cada vehículo
-        P_load_sum    = 0.0                                 # Suma de las potencias de las cargas externas
-        P_res_sum     = 0.0                                 # Suma de las potencias de la generación local
-        cp_occupation = [0, 0, 0, 0]                        # Vector que muestra la disponibilidad de puntos de carga
-        ev_n          = 0                                   # Número de vehículos presentes en la estación
-        w             = [0, 0, 0, 0]                        # Pesos
-        P_dem         = [0.0, 0.0, 0.0, 0.0]                # Demanda de potencia media de cada vehículo
-        P_ref_sum = 0
+    def power_allocation(self, enrgy_dem, enrgy_chrgd, t_in, t_out, p_load, p_res, actual_time):
+        p_ref         = [0] * self.n_cs                  # Potencia de referencia de cada vehículo
+        p_load_sum    = 0.0                              # Suma de las potencias de las cargas externas
+        p_res_sum     = 0.0                              # Suma de las potencias de la generación local
+        cp_occupation = [0] * self.n_cs                  # Vector que muestra la disponibilidad de puntos de carga
+        ev_n          = 0                                # Número de vehículos presentes en la estación
+        w             = [0] * self.n_cs                  # Pesos
+        p_dem         = [0.0] * self.n_cs                # Demanda de potencia media de cada vehículo
+        p_ref_sum     = 0
 
         def wfa_function(power_budget, dem_power, max_power, occupation):
             sum_power = 0.0
             n_ev = 0
-            n_cp = 4
+            n_cp = self.n_cs
             ref_power = [0.0] * n_cp
             is_max_power_vector = [0] * n_cp
             is_max_power = 0
@@ -97,22 +97,22 @@ class ChargingStation:
                         elif(max_power_n >= n_ev):
                             is_max_power = 1
 
-            # En caso de no haber vehículos en la estación o si no hay potencia disponible, las referencias se hacen 0
+            # If there are no vehicles at the station, references are 0
             else:
                 ref_power = [0.0] * len(ref_power)
 
             return ref_power
 
         for i in range(self.n_load):
-            P_load_sum += P_load[i]
+            p_load_sum += p_load[i]
 
         for i in range(self.n_res):
-            P_res_sum += P_res[i] 
+            p_res_sum += p_res[i] 
 
-        P_ava = self.P_nom - P_load_sum + P_res_sum
+        p_ava = self.p_nom - p_load_sum + p_res_sum
 
         for i in range(self.n_cs):
-            if((actual_time < t_out[i]) and (t_in[i] < actual_time) and (E_dem[i] > E_ch[i])):
+            if((actual_time < t_out[i]) and (t_in[i] < actual_time) and (enrgy_dem[i] > enrgy_chrgd[i])):
                 cp_occupation[i] = 1
                 ev_n += 1
             else:
@@ -120,25 +120,25 @@ class ChargingStation:
 
         for i in range(self.n_cs):
             if cp_occupation[i]:
-                P_dem[i] = 60.0 * ((E_dem[i] - E_ch[i]) / (t_out[i] - actual_time))
+                p_dem[i] = 60.0 * ((enrgy_dem[i] - enrgy_chrgd[i]) / (t_out[i] - actual_time))
             else:
-                P_dem[i] = 0.0
+                p_dem[i] = 0.0
             
-            if P_dem[i] > 22.0:
-                P_dem[i] = 22.0
+            if p_dem[i] > self.max_chrg_pwr[i]:
+                p_dem[i] = self.max_chrg_pwr[i]
 
-            if P_dem[i] < 0.0:
-                P_dem[i] = 0.0
+            if p_dem[i] < self.min_chrg_pwr[i]:
+                p_dem[i] = self.min_chrg_pwr[i]
 
-        P_ref = wfa_function(P_ava, P_dem, [22.0, 22.0, 22.0, 22.0], cp_occupation)
+        p_ref = wfa_function(p_ava, p_dem, self.max_chrg_pwr, cp_occupation)
 
         for i in range(self.n_cs):
-            P_ref_sum += P_ref[i]
+            p_ref_sum += p_ref[i]
         
-        if P_ref_sum > 0:
+        if p_ref_sum > 0:
             for i in range(self.n_cs):
-                w[i] = P_ref[i] / P_ref_sum 
+                w[i] = p_ref[i] / p_ref_sum 
         else:
             w = [0.0] * self.n_cs
         
-        return P_ref, w
+        return p_ref, w
