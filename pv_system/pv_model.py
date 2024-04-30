@@ -98,6 +98,7 @@ pv_results['pv_power'] = pv_power_list
 pv_results.to_csv("pv_system/pv_results.csv", index = False)
 
 # The calculation is made to 30 years
+"""
 pv_results_30y = pd.DataFrame(columns=['pv_power'])
 pv_power_30y = 0
 pv_power_30y_list = []
@@ -113,3 +114,4 @@ for i in range(30):
 
 pv_results_30y['pv_power'] = pv_power_30y_list
 pv_results_30y.to_csv("pv_system/pv_results_30y.csv", index = False)
+"""
