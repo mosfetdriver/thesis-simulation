@@ -16,7 +16,7 @@
 # Location:
 # (Lat, Long) = (-39.8332, -73.2452)
 # Method: average hourly for a 10 min sample 
-# USE GLOBAL RADIATION FOR SIMULATION
+# USE GLOBAL RADIATION FOR SIMULATION (ACIMUT Y ELEVACIÓN)
 # 
 # Solar panel model: https://enertik.com/wp-content/uploads/sites/2/documentos/folletos/folleto-panel-solar-restarsolar-rt8i-560mp.pdf
 # P_module = 560 [W] (at STC)
@@ -97,8 +97,8 @@ for i in range(len(datetime_list)):
 pv_results['pv_power'] = pv_power_list
 pv_results.to_csv("pv_system/pv_results.csv", index = False)
 
-# The calculation is made to 30 years
 """
+# The calculation is made to 30 years
 pv_results_30y = pd.DataFrame(columns=['pv_power'])
 pv_power_30y = 0
 pv_power_30y_list = []

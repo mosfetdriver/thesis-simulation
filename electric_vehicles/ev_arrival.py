@@ -9,6 +9,8 @@
 import numpy as np
 from datetime import datetime, timedelta
 import pandas as pd
+import matplotlib.pyplot as plt
+from scipy.stats import weibull_min
 
 # ElectricVehicle class
 class ElectricVehicle:
@@ -27,25 +29,99 @@ class ElectricVehicle:
 # The probability of each one is also considered   
 models = ["Renault Kwid", "Hyundai Ioniq", "BYD Dolphin", "BYD Qin", "Tesla Model 3"]
 batt_caps = [26.8, 72.6, 44.9, 53.1, 100.0]
-ev_probs = [0.3, 0.1, 0.3, 0.25, 0.05]
-
-ev_mdl_choice = np.random.choice([0, 1, 2, 3, 4], p = ev_probs)
-start_soc_choice = np.random.choice(np.arange(0.2, 0.45, 0.01))
-end_soc_choice = np.random.choice(np.arange(0.55, 0.8, 0.01))
-
-EV1 = ElectricVehicle(models[ev_mdl_choice], batt_caps[ev_mdl_choice], start_soc_choice, end_soc_choice, 12, 16)
-print(EV1)
+ev_probs = [0.39, 0.1, 0.3, 0.2, 0.01]
 
 # Datetime list is created to store the ev arrival profile generated
 # Also, a dataframe is generated to store all the results
-start_date = datetime(year = 2025, month = 1, day = 1, hour = 0, minute = 0)
-end_date = datetime(year = 2025, month = 12, day = 31, hour = 23, minute = 59)
-time_interval = timedelta(minutes = 1)
+start_datetime = datetime(year = 2025, month = 1, day = 1, hour = 0, minute = 0)
+end_datetime = datetime(year = 2025, month = 12, day = 31, hour = 23, minute = 59)
+time_interval = timedelta(days = 1)
 datetime_list = []
-current_date = start_date
+current_date = start_datetime
 
-while (current_date <= end_date):
+# A pandas dataframe to store the charging events for a day is created
+charging_events = pd.DataFrame(columns = ['id', 'year', 'date', 't_arr', 't_dep', 'e_dem'])
+id_df = []
+year_df = []
+date_df = []
+t_arr_df = []
+t_dep_df = []
+e_dem_df = []
+
+# Probability for number of EVs arriving at the CS during the day
+n_ev_prob = np.random.normal(30, 2, 1)
+n_ev = round(n_ev_prob[0])
+_id = []
+year = [0] * n_ev
+date = [1] * n_ev
+t_arr = []
+t_dep = []
+e_dem = []
+
+for i in range(n_ev):
+    # Probability for arrival and departure of EVs in the station
+    ev_arr_group_choice = np.random.choice(["ARR_AM", "ARR_PM"], p = [0.8, 0.2])
+    ev_dep_min = 0
+
+    if ev_arr_group_choice == "ARR_AM":    
+        ev_arr_min = np.random.normal(555, 90, 1)
+        ev_arr_min = round(ev_arr_min[0])
+    else:
+        ev_arr_min = np.random.normal(885, 75, 1)
+        ev_arr_min = round(ev_arr_min[0])
+    
+    while(ev_dep_min <= ev_arr_min):
+        ev_dep_group_choice = np.random.choice(["DEP_AM", "DEP_PM"], p = [0.3, 0.7])
+        if ev_dep_group_choice == "DEP_AM":
+            ev_dep_min = weibull_min.rvs(165, loc = 0, scale = 735, size = 1)
+            ev_dep_min = round(ev_dep_min[0])
+        else:
+            ev_dep_min = weibull_min.rvs(195, loc = 0, scale = 1065, size = 1)
+            ev_dep_min = round(ev_dep_min[0])
+    
+    ev_mdl_choice = np.random.choice([0, 1, 2, 3, 4], p = ev_probs)
+    start_soc_choice = np.random.choice(np.arange(0.2, 0.45, 0.01))
+    end_soc_choice = np.random.choice(np.arange(start_soc_choice + 0.3, 0.8, 0.05))
+
+    t_arr.append(ev_arr_min)
+    t_dep.append(ev_dep_min)
+    e_dem.append((end_soc_choice - start_soc_choice) * batt_caps[ev_mdl_choice])
+
+    _id.append(i)
+
+sorted_indexes = sorted(range(len(t_arr)), key = lambda x:t_arr[x])
+t_arr_sorted = sorted(t_arr)
+t_dep_sorted = []
+e_dem_sorted = []
+
+for i in range(len(t_arr)):
+    t_dep_sorted.append(t_dep[sorted_indexes[i]])
+    e_dem_sorted.append(e_dem[sorted_indexes[i]])
+
+for i in range(len(t_arr_sorted)):
+    id_df.append(_id[i])
+    year_df.append(year[i])
+    date_df.append(date[i])
+    t_arr_df.append(t_arr_sorted[i])
+    t_dep_df.append(t_dep_sorted[i])
+    e_dem_df.append(e_dem_sorted[i])
+
+charging_events['id'] = id_df
+charging_events['year'] = year_df
+charging_events['date'] = date_df
+charging_events['t_arr'] = t_arr_df
+charging_events['t_dep'] = t_dep_df
+charging_events['e_dem'] = e_dem_df
+
+print(charging_events)
+
+'''
+while (current_date <= end_datetime):
     datetime_list.append(current_date.strftime('%Y-%m-%d %H:%M'))
     current_date += time_interval
 
-ev_arr_results = pd.DataFrame(columns=['datetime'])
+    if(current_date.weekday() < 5):
+        print("weekday")
+    else:
+        print("weekend")
+'''

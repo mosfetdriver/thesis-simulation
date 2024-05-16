@@ -4,6 +4,7 @@
 # Used Building C and data gathered for the year 2021
 # Data is stored in kWh in steps of 1 hour
 # Data must be converted to [p.u.] and must be linearized to time intervals of 1 minute
+# Shift data by 6 months !!
 #
 ###
 
