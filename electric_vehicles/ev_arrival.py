@@ -51,7 +51,6 @@ id_number = 0
 
 # Data are calculated over the selected period of time
 while(current_date <= end_datetime):
-
     # Probability for number of EVs arriving at the CS during the day, for weekday 30 vehicles are considered and for weekends, just 4 
     if(current_date.weekday() < 5):
         n_ev_prob = np.random.normal(30, 2, 1)
@@ -91,14 +90,21 @@ while(current_date <= end_datetime):
                 ev_dep_min = weibull_min.rvs(195, loc = 0, scale = 1065, size = 1)
                 ev_dep_min = round(ev_dep_min[0])
             tries += 1
-            print(tries)
         
         ev_mdl_choice = np.random.choice([0, 1, 2, 3, 4], p = ev_probs)
         start_soc_choice = np.random.choice(np.arange(0.2, 0.45, 0.01))
         end_soc_choice = np.random.choice(np.arange(start_soc_choice + 0.3, 0.8, 0.05))
 
-        t_arr.append(ev_arr_min)
-        t_dep.append(ev_dep_min)
+        current_timestamp = current_date.timestamp()
+
+        ev_arr_timestamp = current_timestamp + ev_arr_min * 60
+        ev_dep_timestamp = current_timestamp + ev_dep_min * 60
+
+        ev_arr_datetime = datetime.fromtimestamp(ev_arr_timestamp)
+        ev_dep_datetime = datetime.fromtimestamp(ev_dep_timestamp)
+
+        t_arr.append(ev_arr_datetime.time())
+        t_dep.append(ev_dep_datetime.time())
         e_dem.append((end_soc_choice - start_soc_choice) * batt_caps[ev_mdl_choice])
         ev_model.append(models[ev_mdl_choice])
         if id_number < 10:
@@ -131,7 +137,6 @@ while(current_date <= end_datetime):
         e_dem_df.append(e_dem_sorted[i])
         ev_model_df.append(ev_model_sorted[i])
 
-    print(current_date)
     current_date += time_interval
 
 # Data from the lists are stored in the df
