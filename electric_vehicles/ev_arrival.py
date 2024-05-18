@@ -27,7 +27,7 @@ class ElectricVehicle:
 
 # The vehicle models considered for the simulation and their respectives battery capacities. 
 # The probability of each one is also considered   
-models = ["Renault Kwid", "Hyundai Ioniq", "BYD Dolphin", "BYD Qin", "Tesla Model 3"]
+models = ["renault_kwid", "hyundai_ioniq", "byd_dolphin", "byd_qin", "tesla_model_3"]
 batt_caps = [26.8, 72.6, 44.9, 53.1, 100.0]
 ev_probs = [0.39, 0.1, 0.3, 0.2, 0.01]
 
@@ -40,12 +40,13 @@ datetime_list = []
 current_date = start_datetime
 
 # A pandas dataframe to store the charging events for a day is created
-charging_events = pd.DataFrame(columns = ['id', 'date', 't_arr', 't_dep', 'e_dem'])
+charging_events = pd.DataFrame(columns = ['id', 'date', 't_arr', 't_dep', 'e_dem', 'ev_model'])
 id_df = []
 date_df = []
 t_arr_df = []
 t_dep_df = []
 e_dem_df = []
+ev_model_df = []
 id_number = 0
 
 # Data are calculated over the selected period of time
@@ -65,6 +66,7 @@ while(current_date <= end_datetime):
     t_arr = []
     t_dep = []
     e_dem = []
+    ev_model = []
 
     # Arrival, departure, model and soc are calculated
     for i in range(n_ev):
@@ -74,10 +76,10 @@ while(current_date <= end_datetime):
         tries = 0
 
         if ev_arr_group_choice == "ARR_AM":    
-            ev_arr_min = np.random.normal(555, 90, 1)
+            ev_arr_min = np.random.normal(555, np.sqrt(90), 1)
             ev_arr_min = round(ev_arr_min[0])
         else:
-            ev_arr_min = np.random.normal(885, 75, 1)
+            ev_arr_min = np.random.normal(885, np.sqrt(75), 1)
             ev_arr_min = round(ev_arr_min[0])
         
         while((ev_dep_min <= ev_arr_min) and (tries < 3)):
@@ -98,17 +100,28 @@ while(current_date <= end_datetime):
         t_arr.append(ev_arr_min)
         t_dep.append(ev_dep_min)
         e_dem.append((end_soc_choice - start_soc_choice) * batt_caps[ev_mdl_choice])
-        _id.append(f"CE{id_number}")
+        ev_model.append(models[ev_mdl_choice])
+        if id_number < 10:
+            _id.append(f"CE000{id_number}")
+        elif (id_number >= 10) and (id_number < 100):
+            _id.append(f"CE00{id_number}")
+        elif (id_number >= 100) and (id_number < 1000):
+            _id.append(f"CE0{id_number}")
+        else:
+            _id.append(f"CE{id_number}")
         id_number += 1
 
     sorted_indexes = sorted(range(len(t_arr)), key = lambda x:t_arr[x])
     t_arr_sorted = sorted(t_arr)
     t_dep_sorted = []
     e_dem_sorted = []
+    ev_model_sorted = []
 
     for i in range(len(t_arr)):
         t_dep_sorted.append(t_dep[sorted_indexes[i]])
         e_dem_sorted.append(e_dem[sorted_indexes[i]])
+        ev_model_sorted.append(ev_model[sorted_indexes[i]])
+
 
     for i in range(len(t_arr_sorted)):
         id_df.append(_id[i])
@@ -116,6 +129,7 @@ while(current_date <= end_datetime):
         t_arr_df.append(t_arr_sorted[i])
         t_dep_df.append(t_dep_sorted[i])
         e_dem_df.append(e_dem_sorted[i])
+        ev_model_df.append(ev_model_sorted[i])
 
     print(current_date)
     current_date += time_interval
@@ -126,6 +140,7 @@ charging_events['date'] = date_df
 charging_events['t_arr'] = t_arr_df
 charging_events['t_dep'] = t_dep_df
 charging_events['e_dem'] = e_dem_df
+charging_events['ev_model'] = ev_model_df
 
 print(charging_events)
 charging_events.to_csv("electric_vehicles/ev_arrivals.csv", index = False)
