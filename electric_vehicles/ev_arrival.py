@@ -39,7 +39,7 @@ time_interval = timedelta(days = 1)
 datetime_list = []
 current_date = start_datetime
 
-# A pandas dataframe to store the charging events for a day is created
+# A pandas dataframe and lists to store the charging events for the period is created 
 charging_events = pd.DataFrame(columns = ['id', 'date', 't_arr', 't_dep', 'e_dem', 'ev_model'])
 id_df = []
 date_df = []
@@ -70,10 +70,12 @@ while(current_date <= end_datetime):
     # Arrival, departure, model and soc are calculated
     for i in range(n_ev):
         # Probability for arrival and departure of EVs in the station
+        # Arrivals and departures are separated into two groups, each with a certain probability 
         ev_arr_group_choice = np.random.choice(["ARR_AM", "ARR_PM"], p = [0.8, 0.2])
         ev_dep_min = 0
         tries = 0
 
+        # EV Arrivals are calculated
         if ev_arr_group_choice == "ARR_AM":    
             ev_arr_min = np.random.normal(555, np.sqrt(90), 1)
             ev_arr_min = round(ev_arr_min[0])
@@ -81,6 +83,7 @@ while(current_date <= end_datetime):
             ev_arr_min = np.random.normal(885, np.sqrt(75), 1)
             ev_arr_min = round(ev_arr_min[0])
         
+        # EV Departures are calculated (DEP must be greater than ARR)
         while((ev_dep_min <= ev_arr_min) and (tries < 3)):
             ev_dep_group_choice = np.random.choice(["DEP_AM", "DEP_PM"], p = [0.3, 0.7])
             if ev_dep_group_choice == "DEP_AM":
@@ -91,18 +94,19 @@ while(current_date <= end_datetime):
                 ev_dep_min = round(ev_dep_min[0])
             tries += 1
         
+        # EV model and SOCs are calculated
         ev_mdl_choice = np.random.choice([0, 1, 2, 3, 4], p = ev_probs)
         start_soc_choice = np.random.choice(np.arange(0.2, 0.45, 0.01))
         end_soc_choice = np.random.choice(np.arange(start_soc_choice + 0.3, 0.8, 0.05))
 
+        # Minutes are transformed to datetime for arrivals and departures
         current_timestamp = current_date.timestamp()
-
         ev_arr_timestamp = current_timestamp + ev_arr_min * 60
         ev_dep_timestamp = current_timestamp + ev_dep_min * 60
-
         ev_arr_datetime = datetime.fromtimestamp(ev_arr_timestamp)
         ev_dep_datetime = datetime.fromtimestamp(ev_dep_timestamp)
 
+        # Arrivals, departures, energy demands, models and ids are stored in lists
         t_arr.append(ev_arr_datetime.time())
         t_dep.append(ev_dep_datetime.time())
         e_dem.append((end_soc_choice - start_soc_choice) * batt_caps[ev_mdl_choice])
@@ -117,6 +121,7 @@ while(current_date <= end_datetime):
             _id.append(f"CE{id_number}")
         id_number += 1
 
+    # Lists are sorted from the earliest to the lates arrival
     sorted_indexes = sorted(range(len(t_arr)), key = lambda x:t_arr[x])
     t_arr_sorted = sorted(t_arr)
     t_dep_sorted = []
@@ -128,7 +133,7 @@ while(current_date <= end_datetime):
         e_dem_sorted.append(e_dem[sorted_indexes[i]])
         ev_model_sorted.append(ev_model[sorted_indexes[i]])
 
-
+    # Lists for the day are appended to the df final list
     for i in range(len(t_arr_sorted)):
         id_df.append(_id[i])
         date_df.append(date[i])
@@ -137,6 +142,7 @@ while(current_date <= end_datetime):
         e_dem_df.append(e_dem_sorted[i])
         ev_model_df.append(ev_model_sorted[i])
 
+    # The current date is updated for the next day
     current_date += time_interval
 
 # Data from the lists are stored in the df
@@ -147,17 +153,6 @@ charging_events['t_dep'] = t_dep_df
 charging_events['e_dem'] = e_dem_df
 charging_events['ev_model'] = ev_model_df
 
+# Data is stored in the csv file
 print(charging_events)
 charging_events.to_csv("electric_vehicles/ev_arrivals.csv", index = False)
-
-
-'''
-while (current_date <= end_datetime):
-    datetime_list.append(current_date.strftime('%Y-%m-%d %H:%M'))
-    current_date += time_interval
-
-    if(current_date.weekday() < 5):
-        print("weekday")
-    else:
-        print("weekend")
-'''
