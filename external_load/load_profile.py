@@ -39,13 +39,13 @@ for i in range(365):
 building_consumption_hr = pd.DataFrame(columns = ['datetime', 'power'])
 building_consumption_hr['datetime'] = datetime_list_hour
 building_consumption_hr['power'] = building_power_hour
-building_consumption_hr.loc[:, 'power'] /= 300
+building_consumption_hr.loc[:, 'power'] /= 450
 
 building_pu_hour = building_consumption_hr['power'].to_list()
 
 # To interpolate the data from hours to minutes, we create new lists for datetime and for energy
-start_date = datetime(year = 2025, month = 1, day = 1, hour = 0, minute = 0)
-end_date = datetime(year = 2025, month = 12, day = 31, hour = 23, minute = 59)
+start_date = datetime(year = 2025, month = 6, day = 1, hour = 0, minute = 0)
+end_date = datetime(year = 2026, month = 5, day = 31, hour = 23, minute = 59)
 time_interval = timedelta(minutes = 1)
 datetime_list_min = []
 current_date = start_date
@@ -60,6 +60,11 @@ building_pwr_min = np.interp(index_interp, index, building_pu_hour)
 building_consumption_min = pd.DataFrame(columns = ['datetime', 'power'])
 building_consumption_min['datetime'] = datetime_list_min
 building_consumption_min['power'] = building_pwr_min
+
+building_consumption_min['datetime'] = building_consumption_min['datetime'].str[5:]
+building_consumption_min['datetime'] = '2025-' + building_consumption_min['datetime']
+
+building_consumption_min = building_consumption_min.sort_values(by = 'datetime')
 
 # The results are exported to a csv file
 building_consumption_min.to_csv("external_load/load_profile.csv", index = False)
