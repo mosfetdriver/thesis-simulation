@@ -1,5 +1,0 @@
-### ECONOMICAL SIMULATION FOR EVCS ###
-#
-#
-#
-###

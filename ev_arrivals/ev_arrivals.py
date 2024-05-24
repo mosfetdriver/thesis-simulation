@@ -9,7 +9,6 @@
 import numpy as np
 from datetime import datetime, timedelta
 import pandas as pd
-import matplotlib.pyplot as plt
 from scipy.stats import weibull_min
 
 # ElectricVehicle class

@@ -44,8 +44,8 @@ building_consumption_hr.loc[:, 'power'] /= 450
 building_pu_hour = building_consumption_hr['power'].to_list()
 
 # To interpolate the data from hours to minutes, we create new lists for datetime and for energy
-start_date = datetime(year = 2025, month = 6, day = 1, hour = 0, minute = 0)
-end_date = datetime(year = 2026, month = 5, day = 31, hour = 23, minute = 59)
+start_date = datetime(year = 2025, month = 7, day = 1, hour = 0, minute = 0)
+end_date = datetime(year = 2026, month = 6, day = 30, hour = 23, minute = 59)
 time_interval = timedelta(minutes = 1)
 datetime_list_min = []
 current_date = start_date
