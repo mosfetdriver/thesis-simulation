@@ -83,7 +83,7 @@ while(current_date <= end_datetime):
             ev_arr_min = round(ev_arr_min[0])
         
         # EV Departures are calculated (DEP must be greater than ARR)
-        while((ev_dep_min <= ev_arr_min) and (tries < 3)):
+        while((ev_dep_min <= ev_arr_min) and (tries < 10)):
             ev_dep_group_choice = np.random.choice(["DEP_AM", "DEP_PM"], p = [0.3, 0.7])
             if ev_dep_group_choice == "DEP_AM":
                 ev_dep_min = weibull_min.rvs(165, loc = 0, scale = 735, size = 1)
@@ -154,4 +154,4 @@ charging_events['ev_model'] = ev_model_df
 
 # Data is stored in the csv file
 print(charging_events)
-charging_events.to_csv("electric_vehicles/ev_arrivals.csv", index = False)
+charging_events.to_csv("ev_arrivals/ev_arrivals.csv", index = False)
