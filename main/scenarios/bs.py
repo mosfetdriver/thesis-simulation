@@ -28,10 +28,16 @@ ev_arr_nth = 0
 ev_dep_nth = 0
 ev_dep_nth_last = 0
 cs_occ = []
+p_load = [0.0] * n_load
+p_res = []
+itr = 0
 
 # EV charging data
 ev_pwr = n_cs * [0.0]
 ev_ch = n_cs * [0.0]
+ev_dem = n_cs * [0.0]
+ev_tin = n_cs * [0.0]
+ev_tout = n_cs * [0.0]
 ev_id = n_cs * ['']
 
 # Datetime data to run the simulation
@@ -47,37 +53,67 @@ bs_evch_results = pd.DataFrame(columns = ['id', 'e_dem', 'e_ch', 'satisfaction',
 
 # Run the simulation
 while(current_datetime <= end_datetime):
+    # The number of EVs in the CS is resetted every minute
     cs_occ_n = 0
 
+    # The external load power is measured here
+    p_load[0] = load_profile.loc[itr, 'power'] * p_nom
+
+    # We update the number to not run the entire charging events
     if(current_datetime.date() > current_date):
         current_date = current_datetime.date()
         ev_dep_nth_last = ev_dep_nth
 
+    # The number of departures per day are counted
     while (str(current_datetime.date()) == ev_arrivals.loc[ev_dep_nth, 'date']):
         ev_dep_nth += 1
     
+    # The minute for the departures are compared and the EVs left the station when is needed
     for i in range(ev_dep_nth_last, ev_dep_nth):
         if(str(current_datetime.time()) == ev_arrivals.loc[i, 't_dep']):
             for j in range(n_cs):
                 if(ev_id[j] == ev_arrivals.loc[i, 'id']):
                     ev_id[j] = ''
+
+                    ev_dem[j] = 0.0
+                    ev_tin[j] = 0.0
+                    ev_tout[j] = 0.0
+                    ev_ch[j] = 0.0
+
                     break
 
+    # Code for the arrival of the EVs to the station
     while ((str(current_datetime.date()) == ev_arrivals.loc[ev_arr_nth, 'date']) and (str(current_datetime.time()) == ev_arrivals.loc[ev_arr_nth, 't_arr'])):
         for i in range(n_cs):
             if(ev_id[i] == ''):
                 ev_id[i] = ev_arrivals.loc[ev_arr_nth, 'id']
+
+                ev_dem[i] = ev_arrivals.loc[ev_arr_nth, 'e_dem']
+                ev_tin[i] = current_datetime.timestamp()
+
+                dep_str = str(current_datetime.date()) + " " + ev_arrivals.loc[ev_arr_nth, 't_dep']
+                dep_datetime = datetime.strptime(dep_str, '%Y-%m-%d %H:%M:%S')
+                ev_tout[i] = dep_datetime.timestamp()
+
                 break
         ev_arr_nth += 1
+
+    # Function to allocate power to the EVs
+    ev_pwr = FCI_ChSt.power_allocation(ev_dem, ev_ch, ev_tin, ev_tout, p_load, p_res, current_datetime.timestamp())
+
+    #print(ev_pwr)
     
+    # The amount of EVs present at the station is counted
     for i in range(n_cs):
         if ev_id[i] != '':
             cs_occ_n += 1
         
+    # The number is appended to a list (change to a pandas dataframe later)
     cs_occ.append(cs_occ_n)
-    print(ev_dep_nth_last, ev_dep_nth)
 
+    # The time is updated
     current_datetime += time_interval
+    itr += 1
 
 plt.plot(cs_occ)
 plt.show()

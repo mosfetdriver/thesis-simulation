@@ -50,7 +50,7 @@ time_interval = timedelta(minutes = 1)
 datetime_list_min = []
 current_date = start_date
 while (current_date <= end_date):
-    datetime_list_min.append(current_date.strftime('%Y-%m-%d %H:%M'))
+    datetime_list_min.append(current_date.strftime('%Y-%m-%d %H:%M:%S'))
     current_date += time_interval
 
 index = np.linspace(start_date.timestamp(), end_date.timestamp(), num = 8760)

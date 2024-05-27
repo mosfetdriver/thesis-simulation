@@ -27,6 +27,7 @@ class ChargingStation:
         w             = [0] * self.n_cs                  # Pesos
         p_dem         = [0.0] * self.n_cs                # Demanda de potencia media de cada vehículo
         p_ref_sum     = 0
+        max_ch_pwr = [7.4] * self.n_cs
 
         def wfa_function(power_budget, dem_power, max_power, occupation):
             sum_power = 0.0
@@ -37,6 +38,7 @@ class ChargingStation:
             is_max_power = 0
             max_power_n = 0
             dem_power_subt = [0.0] * (n_cp - 1)
+            
 
             # La potencia máxima y la demanda de los vehículos se asigna en 0 si es que el vehículo no está presente en la estación
             for i in range(n_cp):
@@ -120,17 +122,17 @@ class ChargingStation:
 
         for i in range(self.n_cs):
             if cp_occupation[i]:
-                p_dem[i] = 60.0 * ((enrgy_dem[i] - enrgy_chrgd[i]) / (t_out[i] - actual_time))
+                p_dem[i] = 3600.0 * ((enrgy_dem[i] - enrgy_chrgd[i]) / (t_out[i] - actual_time))
             else:
                 p_dem[i] = 0.0
             
-            if p_dem[i] > self.max_chrg_pwr[i]:
-                p_dem[i] = self.max_chrg_pwr[i]
+            if p_dem[i] > max_ch_pwr[i]:
+                p_dem[i] = max_ch_pwr[i]
 
             if p_dem[i] < self.min_chrg_pwr[i]:
                 p_dem[i] = self.min_chrg_pwr[i]
 
-        p_ref = wfa_function(p_ava, p_dem, self.max_chrg_pwr, cp_occupation)
+        p_ref = wfa_function(p_ava, p_dem, max_ch_pwr, cp_occupation)
 
         for i in range(self.n_cs):
             p_ref_sum += p_ref[i]
@@ -140,5 +142,7 @@ class ChargingStation:
                 w[i] = p_ref[i] / p_ref_sum 
         else:
             w = [0.0] * self.n_cs
-        
-        return p_ref, w
+
+        #print(p_ref)
+
+        return p_ref
