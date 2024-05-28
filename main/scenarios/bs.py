@@ -38,7 +38,7 @@ ev_id = n_cs * ['']
 
 # Datetime data to run the simulation
 start_datetime = datetime(year = 2025, month = 1, day = 1, hour = 0, minute = 0)
-end_datetime = datetime(year = 2025, month = 1, day = 2, hour = 23, minute = 59)
+end_datetime = datetime(year = 2025, month = 1, day = 31, hour = 23, minute = 59)
 time_interval = timedelta(minutes = 1)
 current_datetime = start_datetime
 current_date = start_datetime.date()
@@ -116,10 +116,9 @@ while(current_datetime <= end_datetime):
     bs_pwr_results = bs_pwr_results._append(pwr_results, ignore_index = True)
 
     # The time is updated
+    print(current_datetime.date())
     current_datetime += time_interval
     itr += 1
 
-
-
-print(bs_pwr_results)
-print(bs_evch_results)
+bs_pwr_results.to_csv('main/scenarios/results/bs/bs_pwr_results.csv', index=False)
+bs_evch_results.to_csv('main/scenarios/results/bs/bs_evch_results.csv', index=False)
