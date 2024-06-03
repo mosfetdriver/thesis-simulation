@@ -44,7 +44,7 @@ current_datetime = start_datetime
 current_date = start_datetime.date()
 
 # Results
-bs_pwr_results = pd.DataFrame(columns = ['datetime', 'load', 'cs', 'cp0', 'cp1', 'cp2', 'cp3', 'cp4', 'cp5', 'cp6', 'cp7', 'cp8', 'cp9', 'cp10', 'cp11', 'n_ev'])
+bs_pwr_results = pd.DataFrame(columns = ['datetime', 'pcc' ,'load', 'cs', 'cp0', 'cp1', 'cp2', 'cp3', 'cp4', 'cp5', 'cp6', 'cp7', 'cp8', 'cp9', 'cp10', 'cp11', 'n_ev'])
 bs_evch_results = pd.DataFrame(columns = ['id', 'e_dem', 'e_ch', 'satisfaction', 'cp'])
 
 # Run the simulation
@@ -109,7 +109,7 @@ while(current_datetime <= end_datetime):
             cs_occ_n += 1
 
     # Power data is stored
-    pwr_results = {'datetime': current_datetime, 'load': p_load[0], 'cs': sum(ev_pwr),
+    pwr_results = {'datetime': current_datetime, 'pcc': p_load[0] + sum(ev_pwr), 'load': p_load[0], 'cs': sum(ev_pwr),
                     'cp0': ev_pwr[0], 'cp1': ev_pwr[1], 'cp2': ev_pwr[2], 'cp3': ev_pwr[3], 'cp4': ev_pwr[4], 'cp5': ev_pwr[5],
                       'cp6': ev_pwr[6], 'cp7': ev_pwr[7], 'cp8': ev_pwr[8], 'cp9': ev_pwr[9], 'cp10': ev_pwr[10], 'cp11': ev_pwr[11], 'n_ev': cs_occ_n}
     

@@ -12,6 +12,7 @@
 import pandas as pd 
 import numpy as np
 from datetime import datetime, timedelta
+import matplotlib.pyplot as plt
 
 # The csv where the data is stored is read. It is worth to mention that the data is stored per day and in columns of 1 hour
 building_energy_raw = pd.read_csv('external_load/building_consumption.csv')
@@ -44,8 +45,8 @@ building_consumption_hr.loc[:, 'power'] /= 450
 building_pu_hour = building_consumption_hr['power'].to_list()
 
 # To interpolate the data from hours to minutes, we create new lists for datetime and for energy
-start_date = datetime(year = 2025, month = 7, day = 4, hour = 0, minute = 0)
-end_date = datetime(year = 2026, month = 7, day = 3, hour = 23, minute = 59)
+start_date = datetime(year = 2025, month = 7, day = 5, hour = 0, minute = 0)
+end_date = datetime(year = 2026, month = 7, day = 4, hour = 23, minute = 59)
 time_interval = timedelta(minutes = 1)
 datetime_list_min = []
 current_date = start_date
