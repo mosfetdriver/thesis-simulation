@@ -18,7 +18,7 @@ class ChargingStation:
     def __str__(self):
         return f"Charging station {self.name} with {self.n_cs} charging points with {self.max_chrg_pwr} [kW] of maximum power."
     
-    def power_allocation(self, enrgy_dem, enrgy_chrgd, t_in, t_out, p_load, p_res, actual_time):
+    def wfa(self, enrgy_dem, enrgy_chrgd, t_in, t_out, p_load, p_res, actual_time):
         p_ref         = [0] * self.n_cs                  # Potencia de referencia de cada vehículo
         p_load_sum    = 0.0                              # Suma de las potencias de las cargas externas
         p_res_sum     = 0.0                              # Suma de las potencias de la generación local
@@ -146,3 +146,43 @@ class ChargingStation:
         #print(p_ref)
 
         return p_ref
+    
+
+
+
+    def std(self, E_dem, E_ch, t_in, t_out, P_load, P_res, actual_time):
+        P_ref         = [0.0] * (self.n_cs)                 # Potencia de referencia de cada vehículo
+        P_load_sum    = 0.0                                 # Suma de las potencias de las cargas externas
+        P_res_sum     = 0.0                                 # Suma de las potencias de la generación local
+        cp_occupation = [False] * self.n_cs        # Vector que muestra la disponibilidad de puntos de carga
+        ev_n          = 0                                   # Número de vehículos presentes en la estación
+        w             = [0] * self.n_cs                       # Pesos
+
+        for i in range(self.n_load):
+            P_load_sum += P_load[i]
+
+        for i in range(self.n_res):
+            P_res_sum += P_res[i] 
+
+        P_ava = self.p_nom - P_load_sum + P_res_sum
+
+        
+        for i in range(self.n_cs):
+            if((actual_time < t_out[i]) and (t_in[i] < actual_time) and (E_dem[i] > E_ch[i])):
+                cp_occupation[i] = True
+                ev_n += 1
+            else:
+                cp_occupation[i] = False
+
+        for i in range(self.n_cs):
+            if(cp_occupation[i]):
+                w[i] = 1 / ev_n
+                P_ref[i] = P_ava / ev_n
+            else:
+                P_ref[i] = 0
+            if(P_ref[i]) > 7.4:
+                P_ref[i] = 7.4
+            elif(P_ref[i]) < 0:
+                P_ref[i] = 0
+
+        return P_ref
