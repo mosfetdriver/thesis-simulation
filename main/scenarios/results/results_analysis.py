@@ -1,28 +1,36 @@
 ### RESULTS ANALYSIS FOR BASE SCENARIO ###
 
 # Libraries
-import matplotlib.pyplot as plt
 import pandas as pd
 
-ch_results = pd.read_csv('main/scenarios/results/bs/bs_evch_results.csv')
-pwr_results = pd.read_csv('main/scenarios/results/bs/bs_pwr_results.csv')
+scenarios = ["bs", "e1", "e2", "e3", "e4", "e5", "e6", "e7", "e8", "e9", "e10", "e11", "e12", "e13", "e14"]
+energy_results = pd.DataFrame(columns = scenarios)
+economic_results = pd.DataFrame(columns = scenarios)
 
-ev_ch_total = ch_results['e_ch'].sum()
-load_total = pwr_results['load'].sum()
-load_total = load_total/60
+for i in range(3):
+    ev_ch_total = 0
+    load_total = 0
+    sat_evs = 0
+    insat_evs = 0
+    scenario = scenarios[i]
 
-pwr_results.plot(x = 'datetime')
-plt.title("Potencia durante el mes de enero")
-plt.ylabel("Potencia [kW]")
-plt.xlabel("Tiempo")
-plt.show()
+    for j in range(1, 13):
+        ch_results = pd.read_csv(f'main/scenarios/results/{scenario}/{scenario}_evch_{j}.csv')
+        pwr_results = pd.read_csv(f'main/scenarios/results/{scenario}/{scenario}_pwr_{j}.csv')
 
-sat_ch = ch_results[ch_results['satisfaction'] >= 1]
-insat_ch = ch_results[ch_results['satisfaction'] < 1]
+        ev_ch_total += ch_results['e_ch'].sum()
+        load_total += pwr_results['load'].sum()
+        load_total += load_total / 60
 
-sat_evs = sat_ch.shape[0]
-insat_evs = insat_ch.shape[0] - 36
-pct = sat_evs / (sat_evs + insat_evs)
-print("SAT EVS: ", sat_evs, " -- INSAT EVS: ", insat_evs, " -- PCT: ", pct*100, "%")
-print("CS ENERGY: ", ev_ch_total, "[kWh]")
-print("LOAD ENERGY: ", load_total, "[kWh]")
+        sat_ch = ch_results[ch_results['satisfaction'] >= 1]
+        insat_ch = ch_results[ch_results['satisfaction'] < 1]
+
+        sat_evs += sat_ch.shape[0]
+        insat_evs += insat_ch.shape[0]
+
+    pct = sat_evs / (sat_evs + (insat_evs - 316))
+    print("SCENARIO:", scenario)
+    print("EVs:", sat_evs + insat_evs,"-- SAT EVS:", sat_evs, "-- INSAT EVS:", insat_evs - 316, "-- PCT:", pct*100, "%")
+    print("CS ENERGY:", ev_ch_total, "[kWh]")
+    print("LOAD ENERGY:", load_total, "[kWh]")
+    print("--")

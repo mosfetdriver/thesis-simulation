@@ -61,14 +61,9 @@ while(current_datetime <= end_datetime):
         current_date = current_datetime.date()
         ev_dep_nth_last = ev_dep_nth
 
-
-
     # The number of departures per day are counted
     while (str(current_datetime.date()) == ev_arrivals.loc[ev_dep_nth, 'date']):
         ev_dep_nth += 1
-
-
-
     
     # The minute for the departures are compared and the EVs left the station when is needed
     for i in range(ev_dep_nth_last, ev_dep_nth):
@@ -124,8 +119,14 @@ while(current_datetime <= end_datetime):
     current_datetime += time_interval
     itr += 1
 
+    
+
+    # Code to store the results for each month
     if (current_datetime.month != last_datetime.month):
-        print(last_datetime.month)
+        # Code to print percentage in console
+        pct = (itr / 525600) * 100
+        print("LOADING...", pct, "%")
+        
         pwr_results.to_csv(f'main/scenarios/results/bs/bs_pwr_{last_datetime.month}.csv', index=False)
         evch_results.to_csv(f'main/scenarios/results/bs/bs_evch_{last_datetime.month}.csv', index=False)
 
