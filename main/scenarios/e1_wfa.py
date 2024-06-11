@@ -1,4 +1,4 @@
-### SCENARIO: GRID - CS - EXTERNAL LOAD ###
+### SCENARIO: GRID - CS - EXTERNAL LOAD - WFA ###
 
 # Libraries and other code
 import charging_station as cs
@@ -121,8 +121,8 @@ while(current_datetime <= end_datetime):
     # Code to store the results for each month
     if (current_datetime.month != last_datetime.month):
         print(last_datetime.month)
-        pwr_results.to_csv(f'main/scenarios/results/e1/e1_pwr_{last_datetime.month}.csv', index=False)
-        ch_results.to_csv(f'main/scenarios/results/e1/e1_evch_{last_datetime.month}.csv', index=False)
+        pwr_results.to_csv(f'main/scenarios/results/e1/pwr/e1_pwr_{last_datetime.month}.csv', index=False)
+        ch_results.to_csv(f'main/scenarios/results/e1/ch/e1_evch_{last_datetime.month}.csv', index=False)
 
         pwr_results = pd.DataFrame(columns = ['datetime', 'pcc' ,'load', 'cs', 'cp0', 'cp1', 'cp2', 'cp3', 'cp4', 'cp5', 'cp6', 'cp7', 'cp8', 'cp9', 'cp10', 'cp11', 'n_ev'])
         ch_results = pd.DataFrame(columns = ['id', 'e_dem', 'e_ch', 'satisfaction', 'cp'])

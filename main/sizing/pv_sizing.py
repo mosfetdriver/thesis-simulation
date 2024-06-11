@@ -1,5 +1,0 @@
-### PV SIZING FOR EVCS
-#
-#
-#
-###
