@@ -8,7 +8,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 #
-scenarios = ["e4"]
+scenarios = ["e3"]
 scenario = scenarios[0]
 energy_results = pd.DataFrame(columns = scenarios)
 yearly_cost = pd.DataFrame(columns = scenarios)
@@ -23,15 +23,17 @@ for j in range(1, 13):
     ch_results = pd.read_csv(f'main/scenarios/results/{scenario}/ch/{scenario}_evch_{j}.csv')
     pwr_results = pd.read_csv(f'main/scenarios/results/{scenario}/pwr/{scenario}_pwr_{j}.csv')
 
-    pwr_results.set_index('datetime', inplace = True)
-    pwr_results.plot()
-    plt.show()
+    #pwr_results.set_index('datetime', inplace = True)
+    #pwr_results.plot()
+    #plt.show()
 
-    pwr_results['subtraction'] = pwr_results['pv'] - pwr_results['cs']
+    pwr_results['subtraction'] = pwr_results['pv'] + pwr_results['bess'] - pwr_results['cs']
     ch_kwh += ch_results['e_ch'].sum()
 
     cs_kwh_grid += abs(pwr_results[pwr_results['subtraction'] < 0]['subtraction'].sum() / 60)
     cs_kwh_pv += pwr_results[pwr_results['subtraction'] > 0]['subtraction'].sum() / 60
+
+
 
     sat_ch = ch_results[ch_results['satisfaction'] >= 1]
     insat_ch = ch_results[ch_results['satisfaction'] < 1]
@@ -89,9 +91,14 @@ n_inv = 11
 
 sp_inv = (sp_cost + sp_struct + sp_cabling) * n_sp + inverter * n_inv
 
+bess_inv = (sp_cost + sp_struct + sp_cabling)*15 + 2*inverter
+print("BESS_INV:", bess_inv)
+# https://dakotalithium.com/product/dakota-lithium-home-backup-power-energy-storage-system-5-20-kwh-battery-3000-watt-inverter/ --> 10 kWh
+
+
 e3_ii = sp_inv + cs_inv
 discount_rate = 0.05
-period = 10
+period = 20
 sell_price_kwh = 150 # 107 E3: SELL PRICE 107 to 10 years
 
 bs_cash_flow =  sell_price_kwh * ch_kwh - kwh_to_clp(cs_kwh_grid, cs_kwh_pv)

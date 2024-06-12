@@ -26,10 +26,10 @@ ev_dep_nth_last = 0
 cs_occ = []
 p_load = [0.0] * n_load
 p_res = [0.0] * n_res
-n_pv = 30
-bess_min_soc = 0.2
-bess_max_soc = 0.8
-bess_cap_kwh = 100
+n_pv = 75
+bess_min_soc = 0.0
+bess_max_soc = 1.0
+bess_cap_kwh = 10
 bess_soe = bess_cap_kwh * bess_min_soc
 bess_soc = bess_min_soc
 bess_ch = 0.0
@@ -46,7 +46,7 @@ ev_id = n_cs * ['']
 
 # Datetime data to run the simulation
 start_datetime = datetime(year = 2025, month = 1, day = 1, hour = 0, minute = 0)
-end_datetime = datetime(year = 2025, month = 1, day = 31, hour = 23, minute = 59)
+end_datetime = datetime(year = 2025, month = 12, day = 31, hour = 23, minute = 59)
 time_interval = timedelta(minutes = 1)
 current_datetime = start_datetime
 current_date = start_datetime.date()
@@ -138,10 +138,6 @@ while(current_datetime <= end_datetime):
         bess_ch = 0
     
     bess_soc = bess_soe / bess_cap_kwh
-    
-    print(current_datetime, "P_BESS:", p_res[1], "-- BESS_CH:", bess_ch, " -- BESS_DCH:", bess_dch, " -- BESS_SOE:", bess_soe, " - BESS_SOC:", bess_soc)
-
-
 
     # Power data is stored
     pwr_results_dict = {'datetime': current_datetime, 'pcc': p_load[0] + sum(ev_pwr) - p_res[0], 'pv': p_res[0], 'bess': p_res[1], 'load': p_load[0], 'cs': sum(ev_pwr),
@@ -151,7 +147,7 @@ while(current_datetime <= end_datetime):
     pwr_results = pwr_results._append(pwr_results_dict, ignore_index = True)
 
     # The time is updated
-    #print(current_datetime)
+    print(current_datetime)
     last_datetime = current_datetime
     current_datetime += time_interval
     itr += 1
