@@ -4,7 +4,6 @@
 import charging_station as cs
 from datetime import datetime, timedelta
 import pandas as pd
-import matplotlib.pyplot as plt
 
 # FCI Charging Station object creation
 name = "FCI Charging Station"
@@ -13,7 +12,7 @@ n_cs = 12
 max_ch_pwr = n_cs * [7.4]
 min_ch_pwr = n_cs * [0.0]
 n_load = 1
-n_res = 1
+n_res = 2
 
 FCI_ChSt = cs.ChargingStation(name, p_nom, n_cs, max_ch_pwr, min_ch_pwr, n_load, n_res)
 
@@ -27,7 +26,14 @@ ev_dep_nth_last = 0
 cs_occ = []
 p_load = [0.0] * n_load
 p_res = [0.0] * n_res
-n_pv = 90
+n_pv = 30
+bess_min_soc = 0.2
+bess_max_soc = 0.8
+bess_cap_kwh = 100
+bess_soe = bess_cap_kwh * bess_min_soc
+bess_soc = bess_min_soc
+bess_ch = 0.0
+bess_dch = 0.0
 itr = 0
 
 # EV charging data
@@ -40,7 +46,7 @@ ev_id = n_cs * ['']
 
 # Datetime data to run the simulation
 start_datetime = datetime(year = 2025, month = 1, day = 1, hour = 0, minute = 0)
-end_datetime = datetime(year = 2025, month = 12, day = 31, hour = 23, minute = 59)
+end_datetime = datetime(year = 2025, month = 1, day = 31, hour = 23, minute = 59)
 time_interval = timedelta(minutes = 1)
 current_datetime = start_datetime
 current_date = start_datetime.date()
@@ -108,16 +114,44 @@ while(current_datetime <= end_datetime):
 
         if ev_id[i] != '':
             cs_occ_n += 1
+    
+    # The logic to store the energy inside the battery is detailed here
+    if((p_res[0] > sum(ev_pwr)) and (bess_soe < bess_max_soc * bess_cap_kwh)):
+
+        bess_ch  = min(((p_res[0] - sum(ev_pwr)) * 0.01666666666), (bess_max_soc * bess_cap_kwh - bess_soe))
+        bess_soe += bess_ch
+        bess_dch = 0
+
+        p_res[1] = -1 * min((p_res[0] - sum(ev_pwr)), ((bess_max_soc * bess_cap_kwh - bess_soe) * 60))
+
+    elif((p_res[0] < sum(ev_pwr)) and (bess_soe > bess_min_soc * bess_cap_kwh)): 
+
+        bess_dch = min(((sum(ev_pwr) - p_res[0]) * 0.01666666666), (bess_soe - bess_min_soc * bess_cap_kwh))
+        bess_soe -= bess_dch
+        bess_ch = 0
+
+        p_res[1] = min((sum(ev_pwr) - p_res[0]), ((bess_soe - bess_min_soc * bess_cap_kwh) * 60))
+    
+    else:
+        p_res[1] = 0.0
+        bess_dch = 0
+        bess_ch = 0
+    
+    bess_soc = bess_soe / bess_cap_kwh
+    
+    print(current_datetime, "P_BESS:", p_res[1], "-- BESS_CH:", bess_ch, " -- BESS_DCH:", bess_dch, " -- BESS_SOE:", bess_soe, " - BESS_SOC:", bess_soc)
+
+
 
     # Power data is stored
-    pwr_results_dict = {'datetime': current_datetime, 'pcc': p_load[0] + sum(ev_pwr) - p_res[0], 'pv': p_res[0], 'bess': 0, 'load': p_load[0], 'cs': sum(ev_pwr),
+    pwr_results_dict = {'datetime': current_datetime, 'pcc': p_load[0] + sum(ev_pwr) - p_res[0], 'pv': p_res[0], 'bess': p_res[1], 'load': p_load[0], 'cs': sum(ev_pwr),
                     'cp0': ev_pwr[0], 'cp1': ev_pwr[1], 'cp2': ev_pwr[2], 'cp3': ev_pwr[3], 'cp4': ev_pwr[4], 'cp5': ev_pwr[5],
                       'cp6': ev_pwr[6], 'cp7': ev_pwr[7], 'cp8': ev_pwr[8], 'cp9': ev_pwr[9], 'cp10': ev_pwr[10], 'cp11': ev_pwr[11], 'n_ev': cs_occ_n}
     
     pwr_results = pwr_results._append(pwr_results_dict, ignore_index = True)
 
     # The time is updated
-    print(current_datetime)
+    #print(current_datetime)
     last_datetime = current_datetime
     current_datetime += time_interval
     itr += 1
@@ -125,8 +159,8 @@ while(current_datetime <= end_datetime):
     # Code to store the results for each month
     if (current_datetime.month != last_datetime.month):
         print(last_datetime.month)
-        pwr_results.to_csv(f'main/scenarios/results/e3/pwr/e3_pwr_{last_datetime.month}.csv', index=False)
-        ch_results.to_csv(f'main/scenarios/results/e3/ch/e3_evch_{last_datetime.month}.csv', index=False)
+        pwr_results.to_csv(f'main/scenarios/results/e4/pwr/e4_pwr_{last_datetime.month}.csv', index=False)
+        ch_results.to_csv(f'main/scenarios/results/e4/ch/e4_evch_{last_datetime.month}.csv', index=False)
 
         pwr_results = pd.DataFrame(columns = ['datetime', 'pcc' ,'load', 'pv', 'bess', 'cs', 'cp0', 'cp1', 'cp2', 'cp3', 'cp4', 'cp5', 'cp6', 'cp7', 'cp8', 'cp9', 'cp10', 'cp11', 'n_ev'])
         ch_results = pd.DataFrame(columns = ['id', 'e_dem', 'e_ch', 'satisfaction', 'cp'])

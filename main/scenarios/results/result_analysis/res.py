@@ -8,7 +8,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 #
-scenarios = ["e3"]
+scenarios = ["e4"]
 scenario = scenarios[0]
 energy_results = pd.DataFrame(columns = scenarios)
 yearly_cost = pd.DataFrame(columns = scenarios)
