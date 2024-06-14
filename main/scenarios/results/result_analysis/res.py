@@ -8,8 +8,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 #
-scenarios = ["e3"]
-scenario = scenarios[0]
+scenarios = ["e3", "e4"]
+scenario = scenarios[0] 
 energy_results = pd.DataFrame(columns = scenarios)
 yearly_cost = pd.DataFrame(columns = scenarios)
 
@@ -28,6 +28,8 @@ for j in range(1, 13):
     #plt.show()
 
     pwr_results['subtraction'] = pwr_results['pv'] + pwr_results['bess'] - pwr_results['cs']
+    #pwr_results['subtraction'] = pwr_results['pv']- pwr_results['cs']
+    # Análisis de sensibilidad en dos dimensiones (dejar fija la batería y dejar fijo los paneles)
     ch_kwh += ch_results['e_ch'].sum()
 
     cs_kwh_grid += abs(pwr_results[pwr_results['subtraction'] < 0]['subtraction'].sum() / 60)
@@ -98,8 +100,8 @@ print("BESS_INV:", bess_inv)
 
 e3_ii = sp_inv + cs_inv
 discount_rate = 0.05
-period = 20
-sell_price_kwh = 150 # 107 E3: SELL PRICE 107 to 10 years
+period = 10
+sell_price_kwh = 107 # 107 E3: SELL PRICE 107 to 10 years # Resolver la ecuación para VAN = 0
 
 bs_cash_flow =  sell_price_kwh * ch_kwh - kwh_to_clp(cs_kwh_grid, cs_kwh_pv)
 
