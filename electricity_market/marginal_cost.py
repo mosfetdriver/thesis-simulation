@@ -62,5 +62,8 @@ def scale(data, new_min, new_max):
     old_max = np.max(data)
     return new_min + (data - old_min) * (new_max - new_min) / (old_max - old_min)
 
-marginal_data['scaled_price'] = scale(marginal_data['clp_pu'], 1.5, 0.5)
-print(marginal_data['scaled_price'])
+# Scaled to demand response
+marginal_data['demand_response'] = scale(marginal_data['clp_pu'], 1.0, 0.5)
+
+# File is exported as csv
+marginal_data.to_csv('electricity_market/demand_response.csv', index = False)
