@@ -1,0 +1,56 @@
+1) INTRODUCCIÓN
+
+El cambio climático, producto de la actividad humanda derivada de la emisión de gases de efecto invernadero, es uno de los problemas más importantes
+a los que se enfrenta el ser humano en la actualidad. Desde la revolución industrial hasta la época actual, el aumento en la emisión de gases 
+contaminantes, entre los que destaca el CO2, ha sido constante. Debido a esto, la temperatura promedio del planeta ha aumentado en más de 1°C
+durante el año 2023, si se compara con el promedio de temperaturas del siglo 21. De continuar esta tendencia, las consecuencias sobre los ecosistemas
+y la vida humana será cada vez más catastrófica, aumentando los eventos climáticos extremos, incluso en lugares donde no solían ocurrir. 
+
+Es por esta razón que durante la conferencia sobre el cambio climático, la gran mayoría de los países ha decidido reducir sus emisiones de gases de efecto invernadero,
+considerando alcanzar un peak de emisiones para el año 2030 y que sus economías sean carbono neutral para el año 2050. Dentro de las iniciativas para alcanzar
+estos objetivos, destaca la generación de energía eléctrica a través de tecnologías más limpias como los paneles solares, los aerogeneradores, la energía nuclear o
+las plantas hidroeléctricas, las cuales poseen una emisión de gases contaminantes durante su construcción y operación de hasta 100 veces menos que las plantas
+termoeléctricas, que utilizan combustibles fósiles. Además de la producción de energía eléctrica, otro de los sectores contaminantes a los que se ha puesto
+en el foco de atención es el del transporte, el cual produce alrededor del 40% de las emisiones de gases de CO2 totales. 
+
+Debido a la gran cuota de contaminación del sector del transporte, es que los gobiernos han comenzado a incentivar el uso de vehículos eléctricos y a desincentivar
+el uso de vehículos propulsados por motores de combustión interna. En este contexto, los gobiernos han propuesto diferentes fechas límite para la prohibición de la 
+venta de vehículos de combustión interna, pasando por el 2025 para Noruega, 2028 para Francia y 2030 para España, por dar algunos ejemplos notables. En el caso de Chile,
+este año es el 2035 para la venta de vehículos livianos de transporte privado, 2040 para buses y camiones y 2050 para vehículos de la industria. En línea con esto,
+el precio de los vehículos eléctricos llegará a la paridad con los vehículos de combustión interna para el año 2026 y su precio se seguirá reduciendo a medida que la
+industria vaya madurando los procesos de fabricación de sus diversos componentes.
+
+A pesar de que las emisiones de gases de efecto ivernadero de un vehículo eléctrico durante su producción y operación sean mucho más bajas que las de un vehículo
+de combustión interna, existen varias dificultades que se deben abordar para la adopción masiva de esta tecnología. Dentro de las más relevantes se encuentra la 
+irrupción a la red eléctrica producida por los vehículos, los cuales consumen una gran cantidad de electricidad para su funcionamiento. La red eléctrica no está
+preparada para recibir un aumento de la demanda tan acentuado como el que traería consigo una adopción masiva de vehículos eléctricos. Además de esto, si es que
+la producción de esa electricidad es a partir de combustibles fósiles, la reducción de emisiones de CO2 queda en entredicho. 
+
+Para poder realizar el cobro y la operación de las estaciones de carga, deben constituirse empresas encargadas de realizar este trabajo, las cuales deben 
+ser capaces de tener utilidades para que su funcionamiento sea estable y apropiado en el tiempo. Es por esta razón que este estudio se encarga de realizar un 
+análisis económico para evaluar la factibilidad técnico-económica de la instalación de una estación de carga de vehículos eléctricos para la ciudad de Valdivia, 
+Chile. Este análisis incluye, en primera instancia, el análisis base, que mide la operación de la estación de carga sin tecnología adicional; en segunda instancia,
+el análisis de algoritmos de reparto de potencia hacia los vehículos eléctricos; en tercera instancia, el análisis de la integración de fuentes de energía renovable, 
+considerando paneles fotovoltaicos y sistemas de almacenamiento estático y, en última instancia, una posible integración de este tipo de infraestructura en un eventual
+mercado de servicios complementarios localizado en distribución.
+
+1.1) Background
+Diversos estudios han analizado la factibilidad técnico-económica de las estaciones de carga de vehículos eléctricos, las que generalmente producen resultados poco satisfactorios
+en cuanto a operación comercial, debido a que la energía comprada a la red de distribución se debe vender a un precio mayor para poder recuperar la inversión realizada en infraestructura. En \cite{liang2022analysis} se identifican los factores que influyen en la operación económica de una estación de carga, entre los que se identifican el precio de carga, el precio de la gasolina, la batería del vehículo eléctrico, la estabilidad de la fuente de alimentación y, el más importante, la cantidad de vehículos eléctricos presentes en el entorno donde se efectúa la instalación.
+
+En \cite{hasan2023techno}, se analiza la instalación de una estación de carga en el aeropuerto internacional de Chattogram en Bangladesh, concluyendo que la instalación de
+paneles fotovoltaicos en conjunto con turbinas eólicas ofrece mayores beneficios económicos para el operador. Otro ejemplo de una instalación similar se encuentra en  \cite{sierra2020technical}, en donde se analiza la instalación de estaciones de carga en diversas ciudades de China y EEUU, incluyendo un sistema de generación fotovoltaica
+apoyado por sistemas de almacenamiento, concluyendo que las ubicaciones comerciales o de oficina ofrecen pueden ser soluciones factibles desde el punto de vista comercial, incluso 
+comparado a vehículos de gasolina.
+
+A pesar de que los resultados obtenidos por los diversos estudios dan respuesta afirmativa a la pregunta de si es factible económicamente integrar fuentes renovables locales,
+algunos de ellos contemplan subsidios para la compra de este tipo de infraestructura, otros se enfocan en la cuantificación en la reducción de gases de efecto invernadero y,
+además, no hay un estudio que contemple el caso chileno.   
+
+
+
+
+1.2) Objetivos del estudio
+El objetivo principal de este artículo es evaluar la rentabilidad de una estación de recarga de vehículos eléctricos bajo distintas condiciones operacionales, considerando generación fotovoltaica y almacenamiento estático local. Como objetivos específicos se identifican (i) implementar un algoritmo de carga dinámica en tiempo real que considere la energía demandada y el tiempo de estadía como variables de priorización; (ii) implementar un diseño para una estación de recarga de vehículos eléctricos que cuente con paneles fotovoltaicos y almacenamiento estático local. ; (iii) identificar potenciales mecanismos de participación de una estación de recarga en el mercado eléctrico en Chile, por ejemplo, en un eventual mercado de servicios complementarios y (iv) generar recomendaciones de negocio para operadores o dueños de estaciones de recarga basado en los escenarios planteados para el caso propuesto.
+
+El artículo se organiza de la siguiente manera: en la Sección II se detalla el caso de estudio, identificando la localización y las condiciones de operación de la estación de carga, en la Sección III se detalla la metodología utilizada para simular la producción de energía fotovoltaica, el comportamiento del sistema de almacenamiento, la llegada y salida de vehículos y las consginas de potencia generadas desde la empresa distribuidora. En la Sección IV se analizan los resultados obtenidos, comenzando por el análisis de los algoritmos de reparto de potencia y continuando con el análisis económico de los distintos escenarios propuestos. En la Sección V se discuten los resultados obtenidos y, finalmente, en la Sección VI se muestren las conclusiones del trabajo.
