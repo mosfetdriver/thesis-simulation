@@ -21,12 +21,12 @@ marginal_data['usd'] = marginal_data['usd'].str.replace(',', '').astype(float)
 marginal_data['clp'] = marginal_data['clp'].str.replace(',', '').astype(float)
 
 # Last value is deleted
-last_index = marginal_data.index[-1]
-marginal_data = marginal_data.drop(last_index)
+#last_index = marginal_data.index[-1]
+#marginal_data = marginal_data.drop(last_index)
 
 # Datetime values are generated
 start_date = '2025-01-01 00:00:00'
-end_date = '2025-12-31 23:00:00'
+end_date = '2026-01-01 00:00:00'
 date_range = pd.date_range(start=start_date, end=end_date, freq='h')
 marginal_data['datetime'] = date_range
 
@@ -62,8 +62,13 @@ def scale(data, new_min, new_max):
     old_max = np.max(data)
     return new_min + (data - old_min) * (new_max - new_min) / (old_max - old_min)
 
-# Scaled to demand response
+# Scaled to demand response (1 for low cost - 0.5 for high cost)
 marginal_data['demand_response'] = scale(marginal_data['clp_pu'], 1.0, 0.5)
 
+# Data is interpolated to generate 1-minute values
+marginal_data.set_index('datetime', inplace = True)
+marginal_data_min = marginal_data.resample('min').asfreq()
+marginal_data_int = marginal_data_min.interpolate(method = 'linear')
+
 # File is exported as csv
-marginal_data.to_csv('electricity_market/demand_response.csv', index = False)
+marginal_data_int.to_csv('electricity_market/demand_response.csv', index = False)

@@ -1,5 +1,0 @@
-### DATA FOR DEMAND RESPONSE EVENTS IN A YEAR ###
-#
-#
-#
-###

@@ -18,7 +18,7 @@ class ChargingStation:
     def __str__(self):
         return f"Charging station {self.name} with {self.n_cs} charging points with {self.max_chrg_pwr} [kW] of maximum power."
     
-    def wfa(self, enrgy_dem, enrgy_chrgd, t_in, t_out, p_load, p_res, actual_time):
+    def wfa(self, enrgy_dem, enrgy_chrgd, t_in, t_out, p_load, p_res, actual_time, dem_r):
         p_ref         = [0] * self.n_cs                  # Potencia de referencia de cada vehículo
         p_load_sum    = 0.0                              # Suma de las potencias de las cargas externas
         p_res_sum     = 0.0                              # Suma de las potencias de la generación local
@@ -111,7 +111,7 @@ class ChargingStation:
         for i in range(self.n_res):
             p_res_sum += p_res[i] 
 
-        p_ava = self.p_nom - p_load_sum + p_res_sum
+        p_ava = dem_r * self.p_nom - p_load_sum + p_res_sum
 
         for i in range(self.n_cs):
             if((actual_time < t_out[i]) and (t_in[i] < actual_time) and (enrgy_dem[i] > enrgy_chrgd[i])):
