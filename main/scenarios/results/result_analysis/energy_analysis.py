@@ -11,6 +11,11 @@ month = 12
 
 # Dataframe to store energy results
 energy_results = pd.DataFrame(columns = scenarios)
+summary = pd.DataFrame()
+summary['description'] = ["insat_evs", "sat_evs", "total_evs", "pct_to_bs", "cs_energy", "load_energy"]
+
+for col in range(len(scenarios)):
+    summary[scenarios[col]] = ""
 
 # Lists to store monthly energy are created
 bs_energy = []
@@ -69,6 +74,13 @@ for i in range(8):
     print("LOAD ENERGY:", load_total, "[kWh]")
     print("--")
 
+    summary.loc[0, scenario] = insat_evs
+    summary.loc[1, scenario] = sat_evs
+    summary.loc[2, scenario] = insat_evs + sat_evs
+    summary.loc[3, scenario] = pct
+    summary.loc[4, scenario] = ev_ch_total
+    summary.loc[5, scenario] = load_total
+
 energy_results['bs'] = bs_energy
 energy_results['wfa'] = wfa_energy
 energy_results['std'] = std_energy
@@ -88,4 +100,4 @@ s3_energy = energy_results['s3'].sum()
 s4_energy = energy_results['s4'].sum()
 s5_energy = energy_results['s5'].sum()
 
-print(energy_results)
+print(summary)
