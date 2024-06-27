@@ -11,7 +11,7 @@ month = 12
 
 # Dataframe to store energy results
 summary = pd.DataFrame()
-summary['description'] = ["insat_evs", "sat_evs", "total_evs", "pct_to_bs", "cs_energy", "load_energy", "res_energy", "grid_energy"]
+summary['description'] = ["insat_evs", "sat_evs", "total_evs", "pct_to_bs", "cs_energy", "load_energy", "injected_energy", "grid_energy"]
 
 for col in range(len(scenarios)):
     summary[scenarios[col]] = ""
@@ -34,6 +34,8 @@ for i in range(8):
     sat_evs = 0
     insat_evs = 0
     scenario = scenarios[i]
+    res_energy = 0
+    grid_energy = 0
 
     for month in range(1, 13):
         ch_results = pd.read_csv(f'main/scenarios/results/{scenario}/ch/{scenario}_evch_{month}.csv')
@@ -42,6 +44,16 @@ for i in range(8):
         monthly_ch = ch_results['e_ch'].sum()
         ev_ch_total += ch_results['e_ch'].sum()
         load_total += pwr_results['load'].sum() / 60
+
+        print(i)
+
+        if(i > 2 and i != 5):
+            pwr_results['subtraction'] = pwr_results['pv'] - pwr_results['cs']
+
+            grid_energy += abs(pwr_results[pwr_results['subtraction'] < 0]['subtraction'].sum() / 60)
+            res_energy += pwr_results[pwr_results['subtraction'] > 0]['subtraction'].sum() / 60
+        else:
+            grid_energy = ev_ch_total
 
         sat_ch = ch_results[ch_results['satisfaction'] >= 1]
         insat_ch = ch_results[ch_results['satisfaction'] < 1]
@@ -57,5 +69,7 @@ for i in range(8):
     summary.loc[3, scenario] = pct
     summary.loc[4, scenario] = ev_ch_total
     summary.loc[5, scenario] = load_total
+    summary.loc[6, scenario] = res_energy
+    summary.loc[7, scenario] = grid_energy
 
 print(summary)
