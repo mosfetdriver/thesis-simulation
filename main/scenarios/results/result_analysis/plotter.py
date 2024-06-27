@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 # Scenarios are loaded
 scenarios = ["bs", "wfa", "std", "s1", "s2", "s3", "s4", "s5"]
-scenario = scenarios[7]
+scenario = scenarios[5]
 
 month = 6
 
