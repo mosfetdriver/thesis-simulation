@@ -101,7 +101,7 @@ for i in range(len(scenarios)):
 
 # NPV analysis
 npv_rate = 0.1
-npv_years = 20
+npv_years = 10
 sell_price = 180
 
 def npv(rate, term, sell_price, cs_energy, electr_bill, initial_investment):
@@ -115,7 +115,7 @@ for i in range(len(scenarios)):
     economic_summary.loc[3, scenarios[i]] = npv(npv_rate, npv_years, sell_price, energy_summary.loc[4, scenarios[i]] ,economic_summary.loc[0, scenarios[i]], economic_summary.loc[1, scenarios[i]])
 
 # IRR analysis
-irr_years = 20
+irr_years = 10
 irr_sell_price = 180
 
 def irr(term, sell_price, cs_energy, electr_bill, initial_investment):

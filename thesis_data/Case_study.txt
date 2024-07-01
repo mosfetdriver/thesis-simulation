@@ -1,3 +1,8 @@
+A) Estudio de la ubicación
 El Campus Mirafores, parte de la Universidad Austral de Chile, alberga la Facultad de Ciencias de la Ingeniería. En esta Facultad se encuentra el Edificio de Informática,
 en cuyo estacionamiento se propone instalar una estación de carga de vehículos de vehículos eléctricos que se compone de 12 puntos de carga de 7,4 [kW] de potencia máxima
 cada uno. Cada estacionamiento mide 2.5 [m] de ancho por 5 [m] de largo.
+
+B) Irradiancia
+Para obtener los datos de irradiancia de la ubicación seleccionada, se utiliza la herramienta Explorador Solar del Ministerio de Energía, el cual entrega datos de irradiancia y
+temperatura para todo el territorio de Chile. Se utiliza la ubicación mencionada en la sección anterior para obtener 
