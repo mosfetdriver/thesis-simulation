@@ -119,8 +119,6 @@ while(current_datetime <= end_datetime):
     current_datetime += time_interval
     itr += 1
 
-    
-
     # Code to store the results for each month
     if (current_datetime.month != last_datetime.month):
         # Code to print percentage in console

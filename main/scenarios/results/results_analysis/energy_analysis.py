@@ -16,6 +16,10 @@ monthly_grid_summ = pd.DataFrame(columns = scenarios)
 monthly_injected_summ = pd.DataFrame(columns = scenarios)
 monthly_cs_summ = pd.DataFrame(columns = scenarios)
 
+# Dataframe to store monthly max power and max power in peak hours
+monthly_max_power = pd.DataFrame(columns = scenarios)
+monthly_max_power_peak_hour = pd.DataFrame(columns = scenarios)
+
 # Base scenario unsatisfied EVs are located
 for month in range(1, 13):
     bs_ch_results = pd.read_csv(f'main/scenarios/results/bs/ch/bs_evch_{month}.csv')
@@ -35,10 +39,39 @@ for i in range(8):
     monthly_grid_list = []
     monthly_injected_list = []
     monthly_cs_list = []
+    monthly_max_power_list = []
+    monthly_max_power_peak_hour_list = []
 
     for month in range(1, 13):
         ch_results = pd.read_csv(f'main/scenarios/results/{scenario}/ch/{scenario}_evch_{month}.csv')
         pwr_results = pd.read_csv(f'main/scenarios/results/{scenario}/pwr/{scenario}_pwr_{month}.csv')
+
+        if(i > 2 and i != 5):
+            pwr_results['cs_pcc'] = pwr_results['cs'] - pwr_results['pv'] - pwr_results['bess'] - pwr_results['load']
+        elif(i == 0):
+            pwr_results['cs_pcc'] = pwr_results['cs']
+        else:
+            pwr_results['cs_pcc'] = pwr_results['cs'] - pwr_results['load']
+
+        # Monthly max-power location
+        cs_max_pwr = pwr_results['cs_pcc'].max()
+        if(cs_max_pwr > 0):
+            monthly_max_power_list.append(cs_max_pwr)
+        else:
+            monthly_max_power_list.append(0)
+
+        if(month >= 4 and month <= 9):
+            desired_hours = [18, 19, 20, 21, 22]
+            pwr_results['datetime'] = pd.to_datetime(pwr_results['datetime'])
+            peak_hours = pwr_results[pwr_results['datetime'].dt.hour.isin(desired_hours)]
+            cs_max_peak_hour_pwr = peak_hours['cs_pcc'].max()
+            if(cs_max_peak_hour_pwr > 0):
+                monthly_max_power_peak_hour_list.append(cs_max_peak_hour_pwr)
+            else:
+                monthly_max_power_peak_hour_list.append(0)
+        else:
+            monthly_max_power_peak_hour_list.append(0)
+
 
         monthly_ch = ch_results['e_ch'].sum()
         ev_ch_total += ch_results['e_ch'].sum()
@@ -80,11 +113,16 @@ for i in range(8):
     monthly_grid_summ[scenarios[i]] = monthly_grid_list
     monthly_injected_summ[scenarios[i]] = monthly_injected_list
     monthly_cs_summ[scenarios[i]] = monthly_cs_list
+    monthly_max_power_peak_hour[scenarios[i]] = monthly_max_power_peak_hour_list
+    monthly_max_power[scenarios[i]] = monthly_max_power_list
 
 summary.to_csv('main/scenarios/results/results_analysis/energy_results/annual_summary.csv', index = False)
 monthly_grid_summ.to_csv('main/scenarios/results/results_analysis/energy_results/monthly_grid_kwh.csv', index = False)
 monthly_injected_summ.to_csv('main/scenarios/results/results_analysis/energy_results/monthly_injected_kwh.csv', index = False)
 monthly_cs_summ.to_csv('main/scenarios/results/results_analysis/energy_results/monthly_cs_kwh.csv', index = False)
+monthly_max_power_peak_hour.to_csv('main/scenarios/results/results_analysis/energy_results/monthly_max_power_peak_hour.csv', index = False)
+monthly_max_power.to_csv('main/scenarios/results/results_analysis/energy_results/monthly_max_power.csv', index = False)
+
 
 def sci_notation(x):
     return f"{x:.2e}"
