@@ -57,11 +57,12 @@ cs_ii = cp_n * cp_cost + cs_construction_cost
 # PV system initial investment
 pv_modules_cost = 150e3
 pv_n = 90
-inverter_cost = 500e3
+inverter_cost = 750e3
 inverter_n = 10
-pv_construction_cost = 5e6
+pv_construction_cost = 2e6
+pv_roof = 10e6
 
-pv_ii = pv_modules_cost * pv_n + inverter_cost * inverter_n + pv_construction_cost
+pv_ii = pv_modules_cost * pv_n + inverter_cost * inverter_n + pv_construction_cost + pv_roof
 
 # BESS initial investment
 bess_cost = 25e6
