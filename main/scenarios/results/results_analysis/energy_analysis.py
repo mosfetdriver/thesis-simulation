@@ -81,10 +81,15 @@ for i in range(8):
     monthly_injected_summ[scenarios[i]] = monthly_injected_list
     monthly_cs_summ[scenarios[i]] = monthly_cs_list
 
-
-print(tabulate(summary, headers = 'keys', tablefmt = 'pretty', showindex = False))
-
 summary.to_csv('main/scenarios/results/results_analysis/energy_results/annual_summary.csv', index = False)
 monthly_grid_summ.to_csv('main/scenarios/results/results_analysis/energy_results/monthly_grid_kwh.csv', index = False)
 monthly_injected_summ.to_csv('main/scenarios/results/results_analysis/energy_results/monthly_injected_kwh.csv', index = False)
 monthly_cs_summ.to_csv('main/scenarios/results/results_analysis/energy_results/monthly_cs_kwh.csv', index = False)
+
+def sci_notation(x):
+    return f"{x:.2e}"
+
+for i in range(len(scenarios)):
+    summary[scenarios[i]] = summary[scenarios[i]].apply(sci_notation)
+
+print(tabulate(summary, headers = 'keys', tablefmt = 'pretty', showindex = False))

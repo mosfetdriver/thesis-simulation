@@ -36,16 +36,8 @@ def kwh2clp(grid_kwh, injected_kwh):
     return service_adm + (public_service + energy_transport + energy_cost) * grid_kwh - injection_price * injected_kwh
 
 # Annual energy price calculation
-for i in range(3):#len(scenarios)):
+for i in range(len(scenarios)):
     economic_summary.loc[0, scenarios[i]] = kwh2clp(energy_summary.loc[6, scenarios[i]], energy_summary.loc[5, scenarios[i]])
-
-# Transformer initial investment
-transformer_cost = 10e6
-cables = 500e3
-transformer_installation = 3e6 
-pole_post = 600e3
-
-trafo_ii = transformer_cost + cables +transformer_installation + pole_post
 
 # CS initial investment
 cp_cost = 750e3
@@ -57,11 +49,14 @@ cs_ii = cp_n * cp_cost + cs_construction_cost
 # PV system initial investment
 pv_modules_cost = 150e3
 pv_n = 90
-inverter_cost = 500e3
+inverter_cost = 750e3
 inverter_n = 10
-pv_construction_cost = 5e6
+pv_construction_cost = 2e6
+pv_roof = 10e6
 
-pv_ii = pv_modules_cost * pv_n + inverter_cost * inverter_n + pv_construction_cost
+pv_30n = pv_modules_cost * 30 + inverter_cost * 4 + pv_construction_cost + pv_roof
+pv_60n = pv_modules_cost * 60 + inverter_cost * 7 + pv_construction_cost + pv_roof
+pv_90n = pv_modules_cost * 90 + inverter_cost * 11 + pv_construction_cost + pv_roof
 
 # BESS initial investment
 bess_cost_25kwh = 5e6
@@ -74,9 +69,33 @@ bess_50wkh_ii = bess_cost_50kwh + bess_construction_cost
 bess_75wkh_ii = bess_cost_75kwh + bess_construction_cost
 
 
-for i in range(3):
-    if i < 3:
-        ii = 10000000
+for i in range(len(scenarios)):
+    ii = cs_ii
+    if i == 0:
+        ii += pv_30n
+    elif i == 1:
+        ii += pv_60n
+    elif i == 2:
+        ii += pv_90n
+    
+    elif i == 3:
+        ii += pv_30n + bess_25wkh_ii
+    elif i == 4:
+        ii += pv_30n + bess_50wkh_ii
+    elif i == 5:
+        ii += pv_30n + bess_75wkh_ii
+    elif i == 6:
+        ii += pv_60n + bess_25wkh_ii
+    elif i == 7:
+        ii += pv_60n + bess_50wkh_ii
+    elif i == 8:
+        ii += pv_60n + bess_75wkh_ii
+    elif i == 9:
+        ii += pv_90n + bess_25wkh_ii
+    elif i == 10:
+        ii += pv_90n + bess_50wkh_ii
+    elif i == 11:
+        ii += pv_90n + bess_75wkh_ii
 
     economic_summary.loc[1, scenarios[i]] = ii
 
@@ -94,7 +113,7 @@ def tenyearprice(rate, term, cs_energy, electr_bill, initial_investment):
     
     return (initial_investment + electr_bill_term) / (cs_energy_term)
 
-for i in range(3):
+for i in range(len(scenarios)):
     economic_summary.loc[2, scenarios[i]] =  tenyearprice(return_rate, years, energy_summary.loc[4, scenarios[i]] ,economic_summary.loc[0, scenarios[i]], economic_summary.loc[1, scenarios[i]])
 
 # NPV analysis
@@ -109,7 +128,7 @@ def npv(rate, term, sell_price, cs_energy, electr_bill, initial_investment):
 
     return income - initial_investment
 
-for i in range(3):
+for i in range(len(scenarios)):
     economic_summary.loc[3, scenarios[i]] = npv(npv_rate, npv_years, sell_price, energy_summary.loc[4, scenarios[i]] ,economic_summary.loc[0, scenarios[i]], economic_summary.loc[1, scenarios[i]])
 
 # IRR analysis
@@ -125,8 +144,16 @@ def irr(term, sell_price, cs_energy, electr_bill, initial_investment):
 
     return npf.irr(cash_flows)
 
-for i in range(3):
+for i in range(len(scenarios)):
     economic_summary.loc[4, scenarios[i]] = irr(irr_years, irr_sell_price, energy_summary.loc[4, scenarios[i]] ,economic_summary.loc[0, scenarios[i]], economic_summary.loc[1, scenarios[i]])
 
+economic_summary.to_csv('main/pv_bess_sizing/sizing_analysis/economic_results/sizing_economic_summary.csv', index = False)
+
+def sci_notation(x):
+    return f"{x:.2e}"
+
+for i in range(len(scenarios)):
+    economic_summary[scenarios[i]] = economic_summary[scenarios[i]].apply(sci_notation)
 
 print(tabulate(economic_summary, headers = 'keys', tablefmt = 'pretty', showindex = False))
+

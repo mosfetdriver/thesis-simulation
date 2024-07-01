@@ -35,7 +35,7 @@ def kwh2clp(grid_kwh, injected_kwh):
 # Annual energy price calculation
 for i in range(len(scenarios)):
     if i > 4:
-        economic_summary.loc[0, scenarios[i]] = kwh2clp(energy_summary.loc[6, scenarios[i]], energy_summary.loc[5, scenarios[i]]) - 1.2e6
+        economic_summary.loc[0, scenarios[i]] = kwh2clp(energy_summary.loc[6, scenarios[i]], energy_summary.loc[5, scenarios[i]]) - 100e3 * 12
     else:
         economic_summary.loc[0, scenarios[i]] = kwh2clp(energy_summary.loc[6, scenarios[i]], energy_summary.loc[5, scenarios[i]])
 
@@ -58,15 +58,15 @@ cs_ii = cp_n * cp_cost + cs_construction_cost
 pv_modules_cost = 150e3
 pv_n = 90
 inverter_cost = 750e3
-inverter_n = 10
+inverter_n = 11
 pv_construction_cost = 2e6
 pv_roof = 10e6
 
 pv_ii = pv_modules_cost * pv_n + inverter_cost * inverter_n + pv_construction_cost + pv_roof
 
 # BESS initial investment
-bess_cost = 25e6
-bess_construction_cost = 1e6
+bess_cost = 5e6
+bess_construction_cost = 2e6
 
 bess_ii = bess_cost + bess_construction_cost
 
@@ -130,5 +130,13 @@ def irr(term, sell_price, cs_energy, electr_bill, initial_investment):
 for i in range(len(scenarios)):
     economic_summary.loc[4, scenarios[i]] = irr(irr_years, irr_sell_price, energy_summary.loc[4, scenarios[i]] ,economic_summary.loc[0, scenarios[i]], economic_summary.loc[1, scenarios[i]])
 
+economic_summary.to_csv('main/scenarios/results/results_analysis/economic_results/economic_summary.csv', index = False)
+
+
+def sci_notation(x):
+    return f"{x:.2e}"
+
+for i in range(len(scenarios)):
+    economic_summary[scenarios[i]] = economic_summary[scenarios[i]].apply(sci_notation)
 
 print(tabulate(economic_summary, headers = 'keys', tablefmt = 'pretty', showindex = False))

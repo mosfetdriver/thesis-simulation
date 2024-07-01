@@ -27,7 +27,7 @@ for month in range(1, 13):
 
 
 # Economic analysis is generated
-for i in range(3):
+for i in range(12):
     ev_ch_total = 0
     load_total = 0
     sat_evs = 0
@@ -84,9 +84,16 @@ for i in range(3):
     monthly_cs_summ[scenarios[i]] = monthly_cs_list
 
 
-print(tabulate(summary, headers = 'keys', tablefmt = 'pretty', showindex = False))
 
 summary.to_csv('main/pv_bess_sizing/sizing_analysis/energy_results/sizing_summary.csv', index = False)
 monthly_grid_summ.to_csv('main/pv_bess_sizing/sizing_analysis/energy_results/sizing_monthly_grid_kwh.csv', index = False)
 monthly_injected_summ.to_csv('main/pv_bess_sizing/sizing_analysis/energy_results/sizing_monthly_injected_kwh.csv', index = False)
 monthly_cs_summ.to_csv('main/pv_bess_sizing/sizing_analysis/energy_results/sizing_monthly_cs_kwh.csv', index = False)
+
+def sci_notation(x):
+    return f"{x:.2e}"
+
+for i in range(len(scenarios)):
+    summary[scenarios[i]] = summary[scenarios[i]].apply(sci_notation)
+
+print(tabulate(summary, headers = 'keys', tablefmt = 'pretty', showindex = False))
