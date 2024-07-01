@@ -24,9 +24,6 @@ monthly_max_pwr = pd.read_csv('main/scenarios/results/results_analysis/energy_re
 monthly_max_pwr_peak_hour = pd.read_csv('main/scenarios/results/results_analysis/energy_results/monthly_max_power_peak_hour.csv')
 energy_summary = pd.read_csv('main/scenarios/results/results_analysis/energy_results/annual_summary.csv')
 
-print(monthly_max_pwr)
-print(monthly_max_pwr_peak_hour)
-
 # Energy price calculation
 def kwh2clp(grid_kwh, injected_kwh, max_peak_hour_pwr, max_pwr):
     # Fixed
@@ -149,6 +146,7 @@ for i in range(len(scenarios)):
 
 economic_summary.to_csv('main/scenarios/results/results_analysis/economic_results/economic_summary.csv', index = False)
 
+print(economic_summary)
 
 def sci_notation(x):
     return f"{x:.2e}"
@@ -156,4 +154,4 @@ def sci_notation(x):
 for i in range(len(scenarios)):
     economic_summary[scenarios[i]] = economic_summary[scenarios[i]].apply(sci_notation)
 
-print(tabulate(economic_summary, headers = 'keys', tablefmt = 'pretty', showindex = False))
+#print(tabulate(economic_summary, headers = 'keys', tablefmt = 'pretty', showindex = False))
